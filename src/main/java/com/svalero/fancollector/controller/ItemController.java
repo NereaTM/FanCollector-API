@@ -46,7 +46,7 @@ public class ItemController {
             @RequestParam(required = false) String rareza,
             @RequestParam(required = false) Long idColeccion,
             Authentication authentication) {
-        String email = SecurityUtils.email(authentication);      // null si anónimo
+        String email = SecurityUtils.email(authentication);
         boolean esAdmin = SecurityUtils.isAdmin(authentication);
         boolean esMods  = SecurityUtils.isMods(authentication);
 
