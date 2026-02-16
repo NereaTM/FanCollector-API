@@ -121,7 +121,4 @@ public final class Permisos {
         if (esDuenoItem(ui, actual)) return;
         throw new AccesoDenegadoException();
     }
-
-
-
 }

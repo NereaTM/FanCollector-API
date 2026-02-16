@@ -2,6 +2,7 @@ package com.svalero.fancollector.service;
 
 import com.svalero.fancollector.domain.Coleccion;
 import com.svalero.fancollector.domain.Usuario;
+import com.svalero.fancollector.domain.UsuarioColeccion;
 import com.svalero.fancollector.dto.ColeccionInDTO;
 import com.svalero.fancollector.dto.ColeccionOutDTO;
 import com.svalero.fancollector.dto.ColeccionPutDTO;
@@ -9,14 +10,15 @@ import com.svalero.fancollector.exception.domain.ColeccionNoEncontradaException;
 import com.svalero.fancollector.exception.domain.UsuarioNoEncontradoException;
 import com.svalero.fancollector.exception.security.AccesoDenegadoException;
 import com.svalero.fancollector.repository.ColeccionRepository;
-import com.svalero.fancollector.repository.UsuarioRepository;
+import com.svalero.fancollector.repository.UsuarioColeccionRepository;
 import com.svalero.fancollector.security.auth.CurrentUserResolver;
 import com.svalero.fancollector.security.auth.Permisos;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -32,7 +34,11 @@ public class ColeccionServiceImpl implements ColeccionService {
     @Autowired
     private CurrentUserResolver currentUserResolver;
 
+    @Autowired
+    private UsuarioColeccionRepository usuarioColeccionRepository;
+
     @Override
+    @Transactional
     public ColeccionOutDTO crearColeccion(ColeccionInDTO dto, String emailUsuario)
             throws UsuarioNoEncontradoException {
 
@@ -42,6 +48,16 @@ public class ColeccionServiceImpl implements ColeccionService {
         coleccion.setCreador(creador);
 
         Coleccion guardada = coleccionRepository.save(coleccion);
+
+        UsuarioColeccion usuarioColeccion = new UsuarioColeccion();
+        usuarioColeccion.setUsuario(creador);
+        usuarioColeccion.setColeccion(guardada);
+        usuarioColeccion.setEsCreador(true);
+        usuarioColeccion.setEsFavorita(false);
+        usuarioColeccion.setEsVisible(true);
+        usuarioColeccion.setFechaAgregada(LocalDateTime.now());
+
+        usuarioColeccionRepository.save(usuarioColeccion);
         return modelMapper.map(guardada, ColeccionOutDTO.class);
     }
 
@@ -50,7 +66,14 @@ public class ColeccionServiceImpl implements ColeccionService {
             throws ColeccionNoEncontradaException {
         Coleccion coleccion = coleccionRepository.findById(id)
                 .orElseThrow(() -> new ColeccionNoEncontradaException(id));
-
+        // sin logearme
+        if (emailUsuario == null) {
+            if (coleccion.isEsPublica()) {
+                return modelMapper.map(coleccion, ColeccionOutDTO.class);
+            }
+            throw new ColeccionNoEncontradaException(id);
+        }
+        // logeada
         Usuario actual = currentUserResolver.usuarioActual(emailUsuario);
 
         Permisos.checkPuedeVerColeccion(coleccion, actual, esAdmin);
@@ -139,6 +162,7 @@ public class ColeccionServiceImpl implements ColeccionService {
     }
 
     @Override
+    @Transactional
     public void eliminarColeccion(Long id, String emailUsuario, boolean esAdmin, boolean esMods)
             throws ColeccionNoEncontradaException, UsuarioNoEncontradoException {
 

@@ -19,9 +19,12 @@ public interface ItemService {
 
     List<ItemOutDTO> listarItems(String nombre, String tipo, String rarezaStr, Long idColeccion, String emailUsuario, boolean esAdmin, boolean esMods);
 
-    ItemOutDTO actualizarItem(Long idItem, ItemPutDTO datosItem, String emailUsuario, boolean esAdmin, boolean esMods) throws ItemNoEncontradoException;
+    ItemOutDTO actualizarItem(Long idItem, ItemPutDTO datosItem, String emailUsuario, boolean esAdmin, boolean esMods)
+            throws ItemNoEncontradoException;
 
-    void eliminarItem(Long idItem, String emailUsuario, boolean esAdmin, boolean esMods) throws ItemNoEncontradoException;
+    void eliminarItem(Long idItem, String emailUsuario, boolean esAdmin, boolean esMods)
+            throws ItemNoEncontradoException;
 
-    ItemOutDTO actualizarRareza(Long id, RarezaItem rareza, String emailUsuario, boolean esAdmin, boolean esModsa) throws ItemNoEncontradoException;
+    ItemOutDTO actualizarRareza(Long id, RarezaItem rareza, String emailUsuario, boolean esAdmin, boolean esModsa)
+            throws ItemNoEncontradoException;
 }
