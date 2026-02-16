@@ -10,6 +10,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.security.core.AuthenticationException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,6 +59,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorRespuesta.error404(ex.getMessage()));
     }
 
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorRespuesta> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(new ErrorRespuesta(405, ex.getMessage()));
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorRespuesta> handleAuth(AuthenticationException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorRespuesta(401, "Email o contraseña incorrectos"));
+    }
+
     @ExceptionHandler(UsuarioItemNoEncontradoException.class)
     public ResponseEntity<ErrorRespuesta> handleUsuarioItemNoEncontrado(UsuarioItemNoEncontradoException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorRespuesta.error404(ex.getMessage()));
@@ -71,8 +83,5 @@ public class GlobalExceptionHandler {
                 .body(ErrorRespuesta.error500("Error interno del servidor"));
     }
 
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ErrorRespuesta> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
-        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(new ErrorRespuesta(405, ex.getMessage()));
-    }
+
 }

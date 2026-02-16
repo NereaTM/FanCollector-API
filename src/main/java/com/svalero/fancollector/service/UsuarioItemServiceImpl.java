@@ -57,7 +57,6 @@ public class UsuarioItemServiceImpl implements UsuarioItemService {
             usuarioDueno = usuarioRepository.findById(dto.getIdUsuario())
                     .orElseThrow(() -> new UsuarioNoEncontradoException(dto.getIdUsuario()));
 
-            // 🔒 Solo admin o el mismo usuario puede crear items para ese usuario
             if (!esAdmin && !esMods && !Permisos.esElMismoUsuario(usuarioDueno, emailUsuario)) {
                 throw new AccesoDenegadoException("Solo puedes crear items para ti mismo");
             }

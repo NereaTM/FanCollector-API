@@ -28,5 +28,6 @@ public interface UsuarioItemService {
     UsuarioItemOutDTO actualizarVisibilidad(Long id, Boolean esVisible, String emailUsuario, boolean esAdmin, boolean esMods)
             throws UsuarioItemNoEncontradoException;
 
-    void eliminar(Long id, String emailUsuario, boolean esAdmin, boolean esMods) throws UsuarioItemNoEncontradoException;
+    void eliminar(Long id, String emailUsuario, boolean esAdmin, boolean esMods)
+            throws UsuarioItemNoEncontradoException;
 }
