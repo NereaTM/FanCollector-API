@@ -5,12 +5,13 @@ import com.svalero.fancollector.domain.enums.RolUsuario;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -34,11 +35,11 @@ public class Usuario {
 
     @NotBlank
     @JsonIgnore
-    @Column(name = "contrasena", nullable = false) // PATCH
+    @Column(name = "contrasena", nullable = false)
     private String contrasena;
 
     @Enumerated(EnumType.STRING)
-    private RolUsuario rol = RolUsuario.USER; // PATCH CUANDO IMPLEMENTE JWT SOLO PARA ADMIN
+    private RolUsuario rol = RolUsuario.USER;
 
     @Column(name = "url_avatar", length = 500)
     private String urlAvatar;
@@ -59,4 +60,13 @@ public class Usuario {
             fechaRegistro = LocalDateTime.now();
         }
     }
+
+    @OneToMany(mappedBy = "creador", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Coleccion> coleccionesCreadas = new ArrayList<>();
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UsuarioColeccion> usuarioColecciones = new ArrayList<>();
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UsuarioItem> usuarioItems = new ArrayList<>();
 }
