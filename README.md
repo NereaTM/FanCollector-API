@@ -90,7 +90,7 @@ docker-compose down
 ```
 
 ## Colección de Postman
-[Ver Postman](https://github.com/NereaTM/FanCollector/tree/develop/docs/postman)
+[Ver Postman](https://github.com/NereaTM/FanCollector/tree/develop/docs/README.md)
 
 ---
 Proyecto escolar de DAM Curso 2025–2026
