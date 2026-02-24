@@ -105,6 +105,6 @@ public class ItemController {
         boolean esMods  = SecurityUtils.isMods(authentication);
 
         itemService.eliminarItem(id, email, esAdmin, esMods);
-    return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build();
     }
 }

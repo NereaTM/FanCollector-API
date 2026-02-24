@@ -197,7 +197,7 @@ public class UsuarioColeccionControllerTest {
     public void testModificarUsuarioColeccionExistente() throws Exception {
         UsuarioColeccionPutDTO putDTO = new UsuarioColeccionPutDTO();
         putDTO.setEsFavorita(true);
-        putDTO.setEsCreador(true);
+        // putDTO.setEsCreador(true);
 
         UsuarioColeccionOutDTO outDTO = new UsuarioColeccionOutDTO();
         outDTO.setId(1L);

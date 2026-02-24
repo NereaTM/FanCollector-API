@@ -207,9 +207,13 @@ public class UsuarioColeccionServiceTest {
         boolean esAdmin = true;
         boolean esMods = false;
 
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setId(999L);
+        when(currentUserResolver.usuarioActual(EMAIL)).thenReturn(usuarioActual);
+
         UsuarioColeccionPutDTO dto = new UsuarioColeccionPutDTO();
         dto.setEsFavorita(true);
-        dto.setEsCreador(true);
+       // dto.setEsCreador(true);
 
         UsuarioColeccion ucExistente = new UsuarioColeccion();
         ucExistente.setId(1L);

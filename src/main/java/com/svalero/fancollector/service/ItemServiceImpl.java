@@ -1,9 +1,6 @@
 package com.svalero.fancollector.service;
 
-import com.svalero.fancollector.domain.Coleccion;
-import com.svalero.fancollector.domain.Item;
-import com.svalero.fancollector.domain.Usuario;
-import com.svalero.fancollector.domain.UsuarioItem;
+import com.svalero.fancollector.domain.*;
 import com.svalero.fancollector.domain.enums.EstadoItem;
 import com.svalero.fancollector.domain.enums.RarezaItem;
 import com.svalero.fancollector.dto.ItemInDTO;
@@ -14,6 +11,7 @@ import com.svalero.fancollector.exception.domain.ItemNoEncontradoException;
 import com.svalero.fancollector.exception.domain.UsuarioNoEncontradoException;
 import com.svalero.fancollector.repository.ColeccionRepository;
 import com.svalero.fancollector.repository.ItemRepository;
+import com.svalero.fancollector.repository.UsuarioColeccionRepository;
 import com.svalero.fancollector.repository.UsuarioItemRepository;
 import com.svalero.fancollector.security.auth.CurrentUserResolver;
 import com.svalero.fancollector.security.auth.Permisos;
@@ -43,6 +41,9 @@ public class ItemServiceImpl implements ItemService {
     @Autowired
     private UsuarioItemRepository usuarioItemRepository;
 
+    @Autowired
+    private UsuarioColeccionRepository usuarioColeccionRepository;
+
     @Override
     @Transactional
     public ItemOutDTO crearItem(ItemInDTO datosItem, String emailUsuario, boolean esAdmin, boolean esMods)
@@ -68,20 +69,30 @@ public class ItemServiceImpl implements ItemService {
 
         Item guardado = itemRepository.save(item);
 
-        boolean esCreadorColeccion = Permisos.esCreador(coleccion, actual);
-        if (esCreadorColeccion) {
-            UsuarioItem usuarioItem = new UsuarioItem();
-            usuarioItem.setUsuario(actual);
-            usuarioItem.setColeccion(coleccion);
-            usuarioItem.setItem(guardado);
-            usuarioItem.setEstado(EstadoItem.BUSCO);
-            usuarioItem.setCantidad(1);
-            usuarioItem.setEsVisible(true);
-            usuarioItem.setFechaRegistro(LocalDateTime.now());
+        if (coleccion.isEsPublica() && coleccion.isUsableComoPlantilla()) {
 
-            usuarioItemRepository.save(usuarioItem);
+            List<UsuarioColeccion> unidos = usuarioColeccionRepository.findByColeccion_Id(coleccion.getId());
+
+            for (UsuarioColeccion uc : unidos) {
+                Usuario usuarioDueno = uc.getUsuario();
+
+                // Evitar duplicados por si acaso
+                boolean existe = usuarioItemRepository.existsByUsuarioIdAndColeccionIdAndItemId(
+                        usuarioDueno.getId(), coleccion.getId(), guardado.getId());
+                if (existe) continue;
+
+                UsuarioItem usuarioItem = new UsuarioItem();
+                usuarioItem.setUsuario(usuarioDueno);
+                usuarioItem.setColeccion(coleccion);
+                usuarioItem.setItem(guardado);
+                usuarioItem.setEstado(EstadoItem.BUSCO);
+                usuarioItem.setCantidad(0);
+                usuarioItem.setEsVisible(true);
+                usuarioItem.setFechaRegistro(LocalDateTime.now());
+
+                usuarioItemRepository.save(usuarioItem);
+            }
         }
-
         return modelMapper.map(guardado, ItemOutDTO.class);
     }
 

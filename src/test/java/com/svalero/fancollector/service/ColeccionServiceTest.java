@@ -2,12 +2,14 @@ package com.svalero.fancollector.service;
 
 import com.svalero.fancollector.domain.Coleccion;
 import com.svalero.fancollector.domain.Usuario;
+import com.svalero.fancollector.domain.UsuarioColeccion;
 import com.svalero.fancollector.dto.ColeccionInDTO;
 import com.svalero.fancollector.dto.ColeccionOutDTO;
 import com.svalero.fancollector.dto.ColeccionPutDTO;
 import com.svalero.fancollector.exception.domain.ColeccionNoEncontradaException;
 import com.svalero.fancollector.exception.domain.UsuarioNoEncontradoException;
 import com.svalero.fancollector.repository.ColeccionRepository;
+import com.svalero.fancollector.repository.UsuarioColeccionRepository;
 import com.svalero.fancollector.repository.UsuarioRepository;
 import com.svalero.fancollector.security.auth.CurrentUserResolver;
 import org.junit.jupiter.api.Test;
@@ -36,6 +38,9 @@ public class ColeccionServiceTest {
 
     @Mock
     private UsuarioRepository usuarioRepository;
+
+    @Mock
+    private UsuarioColeccionRepository usuarioColeccionRepository;
 
     @Mock
     private ModelMapper modelMapper;
@@ -79,6 +84,7 @@ public class ColeccionServiceTest {
         assertEquals("Figuras Anime", resultado.getNombre());
         verify(currentUserResolver, times(1)).usuarioActual(EMAIL);
         verify(coleccionRepository, times(1)).save(any(Coleccion.class));
+        verify(usuarioColeccionRepository, times(1)).save(any(UsuarioColeccion.class)); // AÑADIR
     }
 
     @Test
@@ -160,7 +166,7 @@ public class ColeccionServiceTest {
         when(modelMapper.map(coleccion1, ColeccionOutDTO.class)).thenReturn(dto1);
         when(modelMapper.map(coleccion2, ColeccionOutDTO.class)).thenReturn(dto2);
 
-        List<ColeccionOutDTO> resultado = coleccionService.listarColecciones(null, null, null, null, EMAIL, esAdmin, esMods);
+        List<ColeccionOutDTO> resultado = coleccionService.listarColecciones(null, null, null, null, EMAIL, esAdmin, esMods, null);
 
         assertEquals(2, resultado.size());
         assertEquals("Figuras Anime", resultado.get(0).getNombre());

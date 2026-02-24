@@ -69,7 +69,7 @@ public class ColeccionControllerTest {
 
         List<ColeccionOutDTO> colecciones = List.of(coleccion1, coleccion2);
 
-        when(coleccionService.listarColecciones(eq(null), eq(null), eq(null), eq(null), anyString(), anyBoolean(), anyBoolean()))
+        when(coleccionService.listarColecciones(eq(null), eq(null), eq(null), eq(null), anyString(), anyBoolean(), anyBoolean(), eq(null)))
                 .thenReturn(colecciones);
 
         mockMvc.perform(get("/colecciones")
