@@ -24,4 +24,5 @@ public interface UsuarioColeccionRepository extends JpaRepository<UsuarioColecci
     );
 
     boolean existsByUsuario_IdAndColeccion_Id(Long usuarioId, Long coleccionId);
+    List<UsuarioColeccion> findByColeccion_Id(Long coleccionId);
 }

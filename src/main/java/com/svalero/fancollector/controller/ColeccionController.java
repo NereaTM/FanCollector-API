@@ -43,13 +43,14 @@ public class ColeccionController {
             @RequestParam(required = false) String categoria,
             @RequestParam(required = false) Long idCreador,
             @RequestParam(required = false) String nombreCreador,
+            @RequestParam(required = false) Boolean usableComoPlantilla,
             Authentication authentication)
             throws UsuarioNoEncontradoException {
         String email = SecurityUtils.email(authentication);
         boolean esAdmin = SecurityUtils.isAdmin(authentication);
         boolean esMods = SecurityUtils.isMods(authentication);
 
-        return ResponseEntity.ok(coleccionService.listarColecciones(nombre, categoria, idCreador, nombreCreador, email, esAdmin, esMods));
+        return ResponseEntity.ok(coleccionService.listarColecciones(nombre, categoria, idCreador, nombreCreador, email, esAdmin, esMods, usableComoPlantilla));
     }
 
     @GetMapping("/{id}")
@@ -96,7 +97,6 @@ public class ColeccionController {
             @Valid @RequestBody ColeccionPlantillaDTO plantillaDTO,
             Authentication authentication)
             throws ColeccionNoEncontradaException {
-
         String email = SecurityUtils.email(authentication);
         boolean esAdmin = SecurityUtils.isAdmin(authentication);
 

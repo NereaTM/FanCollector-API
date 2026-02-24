@@ -16,7 +16,7 @@ public interface ColeccionService {
     ColeccionOutDTO buscarColeccionPorId(Long id, String emailUsuario, boolean esAdmin, boolean esMods)
             throws ColeccionNoEncontradaException;
 
-    List<ColeccionOutDTO> listarColecciones(String nombre, String categoria, Long idCreador, String nombreCreador,String emailUsuario, boolean esAdmin, boolean esMods)
+    List<ColeccionOutDTO> listarColecciones(String nombre, String categoria, Long idCreador, String nombreCreador,String emailUsuario, boolean esAdmin, boolean esMods, Boolean usableComoPlantilla)
             throws UsuarioNoEncontradoException;
 
     ColeccionOutDTO actualizarColeccion(Long id, ColeccionPutDTO dto, String emailUsuario, boolean esAdmin, boolean esMods)

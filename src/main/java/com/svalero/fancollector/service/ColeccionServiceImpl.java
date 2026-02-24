@@ -82,17 +82,18 @@ public class ColeccionServiceImpl implements ColeccionService {
     }
 
     @Override
-    public List<ColeccionOutDTO> listarColecciones(String nombre, String categoria, Long idCreador, String nombreCreador, String emailUsuario, boolean esAdmin, boolean esMods) {
+    public List<ColeccionOutDTO> listarColecciones(String nombre, String categoria, Long idCreador, String nombreCreador, String emailUsuario, boolean esAdmin, boolean esMods, Boolean usableComoPlantilla) {
 
         List<Coleccion> colecciones;
         boolean noHayFiltros = (nombre == null || nombre.isBlank()) &&
                 (categoria == null || categoria.isBlank()) &&
                 (idCreador == null) &&
-                (nombreCreador == null || nombreCreador.isBlank());
+                (nombreCreador == null || nombreCreador.isBlank()) &&
+                (usableComoPlantilla == null);
         if (noHayFiltros) {
             colecciones = coleccionRepository.findAll();
         } else {
-            colecciones = coleccionRepository.buscarPorFiltros(nombre, categoria, idCreador, nombreCreador);
+            colecciones = coleccionRepository.buscarPorFiltros(nombre, categoria, idCreador, nombreCreador,usableComoPlantilla);
         }
         //cuando no estoy logeada
         if (emailUsuario == null || emailUsuario.isBlank()) {
@@ -109,7 +110,6 @@ public class ColeccionServiceImpl implements ColeccionService {
                 .map(c -> modelMapper.map(c, ColeccionOutDTO.class))
                 .toList();
     }
-
 
     @Override
     public ColeccionOutDTO actualizarColeccion(Long id, ColeccionPutDTO dto, String emailUsuario, boolean esAdmin, boolean esMods)

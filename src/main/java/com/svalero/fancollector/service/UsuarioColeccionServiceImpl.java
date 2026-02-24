@@ -58,6 +58,10 @@ public class UsuarioColeccionServiceImpl implements UsuarioColeccionService {
         Coleccion coleccion = coleccionRepository.findById(dto.getIdColeccion())
                 .orElseThrow(() -> new ColeccionNoEncontradaException(dto.getIdColeccion()));
 
+        if (!coleccion.isEsPublica() || !coleccion.isUsableComoPlantilla()) {
+            throw new AccesoDenegadoException();
+        }
+
         if (usuarioColeccionRepository.existsByUsuario_IdAndColeccion_Id(
                 dto.getIdUsuario(), dto.getIdColeccion())) {
             throw new RelacionYaExisteException();
@@ -123,9 +127,6 @@ public class UsuarioColeccionServiceImpl implements UsuarioColeccionService {
 
         if (dto.getEsFavorita() != null) {
             existente.setEsFavorita(dto.getEsFavorita());}
-
-        if (dto.getEsCreador() != null) {
-            existente.setEsCreador(dto.getEsCreador());}
 
         if (dto.getEsVisible() != null) {
             existente.setEsVisible(dto.getEsVisible());

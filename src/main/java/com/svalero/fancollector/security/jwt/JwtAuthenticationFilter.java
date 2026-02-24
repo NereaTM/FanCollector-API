@@ -38,7 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 System.out.println("Token ok");
 
                 String email = jwtService.getEmailFromToken(token);
-                System.out.println("📧 Email del token: " + email);
+                System.out.println("Email del token: " + email);
 
                 // para no sobrescribir
                 if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {

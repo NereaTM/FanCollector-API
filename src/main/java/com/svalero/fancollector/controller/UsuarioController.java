@@ -1,6 +1,7 @@
 package com.svalero.fancollector.controller;
 
 import com.svalero.fancollector.domain.enums.RolUsuario;
+import com.svalero.fancollector.dto.UsuarioAdminOutDTO;
 import com.svalero.fancollector.dto.UsuarioInDTO;
 import com.svalero.fancollector.dto.UsuarioOutDTO;
 import com.svalero.fancollector.dto.UsuarioPutDTO;
@@ -12,6 +13,7 @@ import com.svalero.fancollector.service.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -52,6 +54,15 @@ public class UsuarioController {
             throws UsuarioNoEncontradoException {
         UsuarioOutDTO usuarioEncontrado  = usuarioService.buscarUsuarioPorId(id);
         return ResponseEntity.ok(usuarioEncontrado );
+    }
+
+    @GetMapping("/{id}/admin")
+    @PreAuthorize("hasAnyRole('ADMIN','MODS')")
+    public ResponseEntity<UsuarioAdminOutDTO> obtenerUsuarioAdmin(
+            @PathVariable long id)
+            throws UsuarioNoEncontradoException {
+        UsuarioAdminOutDTO dto = usuarioService.buscarUsuarioPorIdAdmin(id);
+        return ResponseEntity.ok(dto);
     }
 
     @PutMapping("/{id}")
