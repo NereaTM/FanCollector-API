@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,6 +15,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -32,35 +34,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             String token = parseJwt(request);
-            System.out.println("Token recibido: " + (token != null ? "S" : "N"));
             // Si no hay token, seguimos (Spring decidirá si hace falta estar autenticado)
             if (token != null && jwtService.validateToken(token)) {
-                System.out.println("Token ok");
-
                 String email = jwtService.getEmailFromToken(token);
-                System.out.println("Email del token: " + email);
+                String rol   = jwtService.getRolFromToken(token);
 
                 // para no sobrescribir
                 if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-//                    System.out.println("Usuario cargado: " + userDetails.getUsername());
-//                    System.out.println("Authorities: " + userDetails.getAuthorities());
+                    SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + rol);
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(
-                                    userDetails,
+                                    email,
                                     null,
-                                    userDetails.getAuthorities()
+                                    List.of(authority)
                             );
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
-                    System.out.println("Auth ok");
                 }
-            } else {
-                System.out.println("Token nulo");
             }
         } catch (Exception e) {
             System.err.println("Error en filtro JWT: " + e.getMessage());
-            e.printStackTrace();
         }
 
         filterChain.doFilter(request, response);

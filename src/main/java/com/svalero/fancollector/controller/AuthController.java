@@ -45,10 +45,11 @@ public class AuthController {
     public ResponseEntity<?> token(@Valid @RequestBody LoginDTO dto) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getContrasena()));
-        String token = jwtService.generateToken(authentication.getName());
 
         Usuario usuario = usuarioRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> UsuarioNoEncontradoException.porEmail(authentication.getName()));
+
+        String token = jwtService.generateToken(usuario.getEmail(), usuario.getRol().name());
 
         Map<String, Object> response = new HashMap<>();
         response.put("token", token);
