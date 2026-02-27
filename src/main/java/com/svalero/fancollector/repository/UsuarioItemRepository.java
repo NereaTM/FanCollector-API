@@ -31,4 +31,6 @@ public interface UsuarioItemRepository extends JpaRepository<UsuarioItem, Long> 
             @Param("estado") EstadoItem estado,
             @Param("esVisible") Boolean esVisible
     );
+
+    void deleteByUsuario_IdAndColeccion_Id(Long usuarioId, Long coleccionId);
 }

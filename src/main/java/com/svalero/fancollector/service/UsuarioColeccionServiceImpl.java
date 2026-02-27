@@ -15,12 +15,14 @@ import com.svalero.fancollector.exception.security.AccesoDenegadoException;
 import com.svalero.fancollector.exception.validation.RelacionYaExisteException;
 import com.svalero.fancollector.repository.ColeccionRepository;
 import com.svalero.fancollector.repository.UsuarioColeccionRepository;
+import com.svalero.fancollector.repository.UsuarioItemRepository;
 import com.svalero.fancollector.repository.UsuarioRepository;
 import com.svalero.fancollector.security.auth.CurrentUserResolver;
 import com.svalero.fancollector.security.auth.Permisos;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +45,8 @@ public class UsuarioColeccionServiceImpl implements UsuarioColeccionService {
     @Autowired
     private CurrentUserResolver currentUserResolver;
 
+    @Autowired
+    private UsuarioItemRepository usuarioItemRepository;
 
     @Override
     public UsuarioColeccionOutDTO crear(UsuarioColeccionInDTO dto, String emailUsuario, boolean esAdmin, boolean esMods)
@@ -165,6 +169,7 @@ public class UsuarioColeccionServiceImpl implements UsuarioColeccionService {
         return modelMapper.map(usuarioColeccionRepository.save(uc),UsuarioColeccionOutDTO.class);
     }
 
+    @Transactional
     @Override
     public void eliminar(Long id, String emailUsuario, boolean esAdmin, boolean esMods)
             throws UsuarioColeccionNoEncontradoException {
@@ -172,6 +177,11 @@ public class UsuarioColeccionServiceImpl implements UsuarioColeccionService {
                 .orElseThrow(() -> new UsuarioColeccionNoEncontradoException(id));
         Usuario usuarioActual = currentUserResolver.usuarioActual(emailUsuario);
         Permisos.checkPuedeEditarOBorrarUsuarioColeccion(uc, usuarioActual, esAdmin, esMods);
+
+        usuarioItemRepository.deleteByUsuario_IdAndColeccion_Id(
+                uc.getUsuario().getId(),
+                uc.getColeccion().getId()
+        );
 
         usuarioColeccionRepository.delete(uc);
     }
