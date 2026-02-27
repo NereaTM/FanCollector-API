@@ -3,6 +3,7 @@ package com.svalero.fancollector.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 public class UsuarioPutDTO {
@@ -16,4 +17,5 @@ public class UsuarioPutDTO {
     private String urlAvatar;
     private String descripcion;
     private String contactoPublico;
+    private MultipartFile archivo;
 }

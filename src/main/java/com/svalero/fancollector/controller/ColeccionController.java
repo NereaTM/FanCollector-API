@@ -9,6 +9,7 @@ import com.svalero.fancollector.exception.domain.ColeccionNoEncontradaException;
 import com.svalero.fancollector.exception.domain.UsuarioNoEncontradoException;
 import com.svalero.fancollector.security.auth.SecurityUtils;
 import com.svalero.fancollector.service.ColeccionService;
+import com.svalero.fancollector.util.ImagenUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,14 +28,21 @@ public class ColeccionController {
     @Autowired
     private ColeccionService coleccionService;
 
+    @Autowired
+    private ImagenUtil imagenUtil;
+
     @PostMapping
     public ResponseEntity<ColeccionOutDTO> crearColeccion(
-            @Valid @RequestBody ColeccionInDTO dto,
+            @Valid @ModelAttribute ColeccionInDTO coleccionInDto,
             Authentication authentication)
             throws UsuarioNoEncontradoException {
         String email = SecurityUtils.email(authentication);
 
-        return new ResponseEntity<>(coleccionService.crearColeccion(dto,  email), HttpStatus.CREATED);
+        if (coleccionInDto.getArchivo() != null && !coleccionInDto.getArchivo().isEmpty()) {
+            coleccionInDto.setImagenPortada(imagenUtil.procesarImagen(coleccionInDto.getArchivo()));
+        }
+
+        return new ResponseEntity<>(coleccionService.crearColeccion(coleccionInDto,  email), HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -68,14 +76,22 @@ public class ColeccionController {
     @PutMapping("/{id}")
     public ResponseEntity<ColeccionOutDTO> actualizarColeccion(
             @PathVariable Long id,
-            @Valid @RequestBody ColeccionPutDTO dto,
+            @Valid @ModelAttribute ColeccionPutDTO coleccionPutDTO,
             Authentication authentication)
             throws ColeccionNoEncontradaException, UsuarioNoEncontradoException {
         String email = SecurityUtils.email(authentication);
         boolean esAdmin = SecurityUtils.isAdmin(authentication);
         boolean esMods = SecurityUtils.isMods(authentication);
 
-        return ResponseEntity.ok(coleccionService.actualizarColeccion(id, dto, email, esAdmin, esMods));
+        ColeccionOutDTO coleccionActual = coleccionService.buscarColeccionPorId(id, email, esAdmin, esMods);
+        if (coleccionPutDTO.getArchivo() != null && !coleccionPutDTO.getArchivo().isEmpty()) {
+            imagenUtil.eliminarImagen(coleccionActual.getImagenPortada());
+            coleccionPutDTO.setImagenPortada(imagenUtil.procesarImagen(coleccionPutDTO.getArchivo()));
+        } else {
+            coleccionPutDTO.setImagenPortada(coleccionActual.getImagenPortada());
+        }
+
+        return ResponseEntity.ok(coleccionService.actualizarColeccion(id, coleccionPutDTO, email, esAdmin, esMods));
     }
 
     @PatchMapping("/{id}/publico")

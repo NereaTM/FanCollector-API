@@ -39,12 +39,12 @@ public class ColeccionServiceImpl implements ColeccionService {
 
     @Override
     @Transactional
-    public ColeccionOutDTO crearColeccion(ColeccionInDTO dto, String emailUsuario)
+    public ColeccionOutDTO crearColeccion(ColeccionInDTO coleccionInDto, String emailUsuario)
             throws UsuarioNoEncontradoException {
 
         Usuario creador = currentUserResolver.usuarioActual(emailUsuario);
 
-        Coleccion coleccion = modelMapper.map(dto, Coleccion.class);
+        Coleccion coleccion = modelMapper.map(coleccionInDto, Coleccion.class);
         coleccion.setCreador(creador);
 
         Coleccion guardada = coleccionRepository.save(coleccion);
@@ -112,7 +112,7 @@ public class ColeccionServiceImpl implements ColeccionService {
     }
 
     @Override
-    public ColeccionOutDTO actualizarColeccion(Long id, ColeccionPutDTO dto, String emailUsuario, boolean esAdmin, boolean esMods)
+    public ColeccionOutDTO actualizarColeccion(Long id, ColeccionPutDTO coleccionPutDTO, String emailUsuario, boolean esAdmin, boolean esMods)
             throws ColeccionNoEncontradaException, UsuarioNoEncontradoException {
 
         Coleccion existente = coleccionRepository.findById(id)
@@ -121,12 +121,12 @@ public class ColeccionServiceImpl implements ColeccionService {
         Usuario actual = currentUserResolver.usuarioActual(emailUsuario);
         Permisos.checkPuedeEditarOBorrarColeccion(existente, actual, esAdmin, esMods);
 
-        existente.setNombre(dto.getNombre());
-        existente.setDescripcion(dto.getDescripcion());
-        existente.setCategoria(dto.getCategoria());
-        existente.setImagenPortada(dto.getImagenPortada());
-        existente.setEsPublica(dto.getEsPublica());
-        existente.setUsableComoPlantilla(dto.getUsableComoPlantilla());
+        existente.setNombre(coleccionPutDTO.getNombre());
+        existente.setDescripcion(coleccionPutDTO.getDescripcion());
+        existente.setCategoria(coleccionPutDTO.getCategoria());
+        existente.setImagenPortada(coleccionPutDTO.getImagenPortada());
+        existente.setEsPublica(coleccionPutDTO.getEsPublica());
+        existente.setUsableComoPlantilla(coleccionPutDTO.getUsableComoPlantilla());
 
         return modelMapper.map(coleccionRepository.save(existente),ColeccionOutDTO.class);
     }
