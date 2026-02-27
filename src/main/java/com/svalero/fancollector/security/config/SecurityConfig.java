@@ -44,7 +44,7 @@ public class SecurityConfig {
             .cors(Customizer.withDefaults()) // web
             .csrf(csrf -> csrf.disable()) // abrir para postman
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/auth/**").permitAll() // abierto al mundo
+                    .requestMatchers("/auth/**", "/imagenes/**").permitAll() // abierto al mundo
 
                     .requestMatchers("/usuarios/*/rol").hasRole("ADMIN") // admin cambia roles
                     .requestMatchers("/usuarios/**").authenticated() // el mundo se logea
@@ -65,7 +65,8 @@ public class SecurityConfig {
     @Bean
     UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5500", "http://127.0.0.1:5500"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5500", "http://127.0.0.1:5500","http://localhost:5173",
+                "http://127.0.0.1:5173"));
         configuration.setAllowedMethods(Arrays.asList("GET","POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);

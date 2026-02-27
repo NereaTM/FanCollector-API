@@ -8,6 +8,7 @@ import com.svalero.fancollector.exception.domain.ColeccionNoEncontradaException;
 import com.svalero.fancollector.exception.domain.ItemNoEncontradoException;
 import com.svalero.fancollector.security.auth.SecurityUtils;
 import com.svalero.fancollector.service.ItemService;
+import com.svalero.fancollector.util.ImagenUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,14 +27,21 @@ public class ItemController {
     @Autowired
     private ItemService itemService;
 
+    @Autowired
+    private ImagenUtil imagenUtil;
+
     @PostMapping
-    public ResponseEntity<ItemOutDTO> crearItem(
-            @Valid @RequestBody ItemInDTO itemInDTO,
+    public ResponseEntity<?> crearItem(
+            @Valid @ModelAttribute  ItemInDTO itemInDTO,
             Authentication authentication)
             throws ColeccionNoEncontradaException {
         String email = SecurityUtils.email(authentication);
         boolean esAdmin = SecurityUtils.isAdmin(authentication);
         boolean esMods = SecurityUtils.isMods(authentication);
+
+        if (itemInDTO.getArchivo() != null && !itemInDTO.getArchivo().isEmpty()) {
+            itemInDTO.setImagenUrl(imagenUtil.procesarImagen(itemInDTO.getArchivo()));
+        }
 
         ItemOutDTO nuevo = itemService.crearItem(itemInDTO, email, esAdmin, esMods);
         return new ResponseEntity<>(nuevo, HttpStatus.CREATED);
@@ -70,12 +78,22 @@ public class ItemController {
     @PutMapping("/{id}")
     public ResponseEntity<ItemOutDTO> actualizarItem(
             @PathVariable Long id,
-            @Valid @RequestBody ItemPutDTO itemPutDTO,
+            @Valid @ModelAttribute  ItemPutDTO itemPutDTO,
             Authentication authentication)
             throws ItemNoEncontradoException, ColeccionNoEncontradaException {
         String email = SecurityUtils.email(authentication);
         boolean esAdmin = SecurityUtils.isAdmin(authentication);
         boolean esMods  = SecurityUtils.isMods(authentication);
+
+        ItemOutDTO itemActual = itemService.buscarItemPorId(id, email, esAdmin, esMods);
+        String imagenUrl = null;
+        if (itemPutDTO.getArchivo() != null && !itemPutDTO.getArchivo().isEmpty()) {
+            imagenUrl = imagenUtil.procesarImagen(itemPutDTO.getArchivo());
+            imagenUtil.eliminarImagen(itemActual.getImagenUrl());
+            itemPutDTO.setImagenUrl(imagenUrl);
+        } else {
+            itemPutDTO.setImagenUrl(itemActual.getImagenUrl());
+        }
 
         ItemOutDTO actualizado = itemService.actualizarItem(id, itemPutDTO, email, esAdmin, esMods);
         return ResponseEntity.ok(actualizado);

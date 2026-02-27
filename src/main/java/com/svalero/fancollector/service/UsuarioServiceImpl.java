@@ -96,7 +96,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public UsuarioOutDTO modificarUsuario(
-            long id, UsuarioPutDTO dto, String emailUsuario, boolean esAdmin, boolean esMods)
+            long id, UsuarioPutDTO usuarioPutDTO, String emailUsuario, boolean esAdmin, boolean esMods)
             throws UsuarioNoEncontradoException {
 
         Usuario existente = usuarioRepository.findById(id)
@@ -104,13 +104,13 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         Permisos.checkPuedeEditarUsuario(existente, emailUsuario, esAdmin, esMods);
 
-        existente.setNombre(dto.getNombre());
-        existente.setUrlAvatar(dto.getUrlAvatar());
-        existente.setDescripcion(dto.getDescripcion());
-        existente.setContactoPublico(dto.getContactoPublico());
+        existente.setNombre(usuarioPutDTO.getNombre());
+        existente.setUrlAvatar(usuarioPutDTO.getUrlAvatar());
+        existente.setDescripcion(usuarioPutDTO.getDescripcion());
+        existente.setContactoPublico(usuarioPutDTO.getContactoPublico());
 
         // Validar email si cambió
-        String email = dto.getEmail();
+        String email = usuarioPutDTO.getEmail();
         if (email != null && !email.equalsIgnoreCase(existente.getEmail())) {
             if (usuarioRepository.existsByEmailAndIdNot(email, id)) {
                 throw new EmailDuplicadoException(email);

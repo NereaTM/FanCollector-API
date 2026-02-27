@@ -1,15 +1,13 @@
 package com.svalero.fancollector.controller;
 
 import com.svalero.fancollector.domain.enums.RolUsuario;
-import com.svalero.fancollector.dto.UsuarioAdminOutDTO;
-import com.svalero.fancollector.dto.UsuarioInDTO;
-import com.svalero.fancollector.dto.UsuarioOutDTO;
-import com.svalero.fancollector.dto.UsuarioPutDTO;
+import com.svalero.fancollector.dto.*;
 import com.svalero.fancollector.dto.patches.UsuarioPasswordDTO;
 import com.svalero.fancollector.dto.patches.UsuarioRolDTO;
 import com.svalero.fancollector.exception.domain.UsuarioNoEncontradoException;
 import com.svalero.fancollector.security.auth.SecurityUtils;
 import com.svalero.fancollector.service.UsuarioService;
+import com.svalero.fancollector.util.ImagenUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +25,9 @@ public class UsuarioController {
 
     @Autowired
     private UsuarioService usuarioService;
+
+    @Autowired
+    private ImagenUtil imagenUtil;
 
     @PostMapping
     public ResponseEntity<UsuarioOutDTO> crearUsuarioComoAdmin(
@@ -68,14 +69,23 @@ public class UsuarioController {
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioOutDTO> modificarUsuario(
             @PathVariable long id,
-            @Valid @RequestBody UsuarioPutDTO dto,
+            @Valid @ModelAttribute UsuarioPutDTO usuarioPutDTO,
             Authentication authentication) throws UsuarioNoEncontradoException {
 
             String emailUsuario = SecurityUtils.email(authentication);
             boolean esAdmin = SecurityUtils.isAdmin(authentication);
             boolean esMods = SecurityUtils.isMods(authentication);
 
-        UsuarioOutDTO usuarioModificado = usuarioService.modificarUsuario(id, dto, emailUsuario, esAdmin, esMods);
+        UsuarioOutDTO usuarioActual = usuarioService.buscarUsuarioPorId(id);
+
+        if (usuarioPutDTO.getArchivo() != null && !usuarioPutDTO.getArchivo().isEmpty()) {
+            imagenUtil.eliminarImagen(usuarioActual.getUrlAvatar());
+            usuarioPutDTO.setUrlAvatar(imagenUtil.procesarImagen(usuarioPutDTO.getArchivo()));
+        } else {
+            usuarioPutDTO.setUrlAvatar(usuarioActual.getUrlAvatar());
+        }
+
+        UsuarioOutDTO usuarioModificado = usuarioService.modificarUsuario(id, usuarioPutDTO, emailUsuario, esAdmin, esMods);
         return ResponseEntity.ok(usuarioModificado);
     }
 

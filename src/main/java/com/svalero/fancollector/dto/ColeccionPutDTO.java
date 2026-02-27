@@ -2,6 +2,7 @@ package com.svalero.fancollector.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 public class ColeccionPutDTO {
@@ -17,4 +18,5 @@ public class ColeccionPutDTO {
     private String imagenPortada;
     private Boolean esPublica;
     private Boolean usableComoPlantilla;
+    private MultipartFile archivo;
 }
