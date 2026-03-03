@@ -166,6 +166,11 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new AccesoDenegadoException("No puedes borrarte la cuenta a ti mismo");
         }
 
+        // un moderador no puede borrar a un admin
+        if (esMods && !esAdmin && usuario.getRol() == RolUsuario.ADMIN) {
+            throw new AccesoDenegadoException("No tienes permisos para eliminar a un administrador");
+        }
+
         usuarioRepository.delete(usuario);
     }
 }
