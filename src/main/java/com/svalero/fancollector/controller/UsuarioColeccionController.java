@@ -5,10 +5,6 @@ import com.svalero.fancollector.dto.UsuarioColeccionOutDTO;
 import com.svalero.fancollector.dto.UsuarioColeccionPutDTO;
 import com.svalero.fancollector.dto.patches.UsuarioColeccionFavoritaDTO;
 import com.svalero.fancollector.dto.patches.UsuarioColeccionVisibleDTO;
-import com.svalero.fancollector.exception.domain.ColeccionNoEncontradaException;
-import com.svalero.fancollector.exception.domain.UsuarioColeccionNoEncontradoException;
-import com.svalero.fancollector.exception.domain.UsuarioNoEncontradoException;
-import com.svalero.fancollector.exception.validation.RelacionYaExisteException;
 import com.svalero.fancollector.security.auth.SecurityUtils;
 import com.svalero.fancollector.service.UsuarioColeccionService;
 import jakarta.validation.Valid;
@@ -32,8 +28,7 @@ public class UsuarioColeccionController {
     @PostMapping
     public ResponseEntity<UsuarioColeccionOutDTO> crear(
             @Valid @RequestBody UsuarioColeccionInDTO dto,
-            Authentication authentication
-    ) throws UsuarioNoEncontradoException, ColeccionNoEncontradaException,RelacionYaExisteException {
+            Authentication authentication) {
         String email = SecurityUtils.email(authentication);
         boolean esAdmin = SecurityUtils.isAdmin(authentication);
         boolean esMods = SecurityUtils.isMods(authentication);
@@ -47,8 +42,7 @@ public class UsuarioColeccionController {
             @RequestParam(required = false) Long idColeccion,
             @RequestParam(required = false) Boolean soloFavoritas,
             @RequestParam(required = false) Boolean esVisible,
-            Authentication authentication
-    ) {
+            Authentication authentication) {
         String email = SecurityUtils.email(authentication);
         boolean esAdmin = SecurityUtils.isAdmin(authentication);
         boolean esMods = SecurityUtils.isMods(authentication);
@@ -59,8 +53,7 @@ public class UsuarioColeccionController {
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioColeccionOutDTO> buscar(
             @PathVariable Long id,
-            Authentication authentication)
-            throws UsuarioColeccionNoEncontradoException {
+            Authentication authentication) {
         String email = SecurityUtils.email(authentication);
         boolean esAdmin = SecurityUtils.isAdmin(authentication);
         boolean esMods = SecurityUtils.isMods(authentication);
@@ -72,8 +65,7 @@ public class UsuarioColeccionController {
     public ResponseEntity<UsuarioColeccionOutDTO> actualizar(
             @PathVariable Long id,
             @Valid @RequestBody UsuarioColeccionPutDTO dto,
-            Authentication authentication
-    ) throws UsuarioColeccionNoEncontradoException {
+            Authentication authentication) {
         String email = SecurityUtils.email(authentication);
         boolean esAdmin = SecurityUtils.isAdmin(authentication);
         boolean esMods = SecurityUtils.isMods(authentication);
@@ -85,8 +77,7 @@ public class UsuarioColeccionController {
     public ResponseEntity<UsuarioColeccionOutDTO> actualizarFavorita(
             @PathVariable Long id,
             @Valid @RequestBody UsuarioColeccionFavoritaDTO dto,
-            Authentication authentication
-    ) throws UsuarioColeccionNoEncontradoException {
+            Authentication authentication) {
         String email = SecurityUtils.email(authentication);
         boolean esAdmin = SecurityUtils.isAdmin(authentication);
         boolean esMods = SecurityUtils.isMods(authentication);
@@ -98,8 +89,7 @@ public class UsuarioColeccionController {
     public ResponseEntity<UsuarioColeccionOutDTO> actualizarVisible(
             @PathVariable Long id,
             @Valid @RequestBody UsuarioColeccionVisibleDTO dto,
-            Authentication authentication
-    ) throws UsuarioColeccionNoEncontradoException {
+            Authentication authentication) {
         String email = SecurityUtils.email(authentication);
         boolean esAdmin = SecurityUtils.isAdmin(authentication);
         boolean esMods = SecurityUtils.isMods(authentication);
@@ -110,8 +100,7 @@ public class UsuarioColeccionController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(
             @PathVariable Long id,
-            Authentication authentication)
-            throws UsuarioColeccionNoEncontradoException {
+            Authentication authentication) {
         String email = SecurityUtils.email(authentication);
         boolean esAdmin = SecurityUtils.isAdmin(authentication);
         boolean esMods = SecurityUtils.isMods(authentication);

@@ -6,7 +6,6 @@ import com.svalero.fancollector.dto.UsuarioColeccionOutDTO;
 import com.svalero.fancollector.dto.UsuarioColeccionPutDTO;
 import com.svalero.fancollector.dto.patches.UsuarioColeccionFavoritaDTO;
 import com.svalero.fancollector.dto.patches.UsuarioColeccionVisibleDTO;
-import com.svalero.fancollector.exception.domain.ColeccionNoEncontradaException;
 import com.svalero.fancollector.exception.domain.UsuarioColeccionNoEncontradoException;
 import com.svalero.fancollector.exception.domain.UsuarioNoEncontradoException;
 import com.svalero.fancollector.exception.validation.RelacionYaExisteException;
@@ -51,7 +50,7 @@ public class UsuarioColeccionControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
-    public void testListarUsuarioColecciones() throws Exception {
+    public void listarUsuarioColecciones_sinFiltros_devuelve200() throws Exception {
         UsuarioColeccionOutDTO uc1 = new UsuarioColeccionOutDTO();
         uc1.setId(1L);
         uc1.setIdUsuario(1L);
@@ -82,7 +81,7 @@ public class UsuarioColeccionControllerTest {
     }
 
     @Test
-    public void testBuscarUsuarioColeccionPorIdExistente() throws Exception {
+    public void buscarUsuarioColeccionPorId_existente_devuelve200() throws Exception {
         UsuarioColeccionOutDTO dto = new UsuarioColeccionOutDTO();
         dto.setId(1L);
         dto.setIdUsuario(1L);
@@ -100,7 +99,7 @@ public class UsuarioColeccionControllerTest {
     }
 
     @Test
-    public void testBuscarUsuarioColeccionPorIdNoExiste() throws Exception {
+    public void buscarUsuarioColeccionPorId_noExiste_devuelve404() throws Exception {
         when(usuarioColeccionService.buscarPorId(eq(999L), anyString(), anyBoolean(), anyBoolean()))
                 .thenThrow(new UsuarioColeccionNoEncontradoException(999L));
 
@@ -110,7 +109,7 @@ public class UsuarioColeccionControllerTest {
     }
 
     @Test
-    public void testCrearUsuarioColeccionDatosValidos() throws Exception {
+    public void crearUsuarioColeccion_datosValidos_devuelve201() throws Exception {
         UsuarioColeccionInDTO inDTO = new UsuarioColeccionInDTO();
         inDTO.setIdUsuario(1L);
         inDTO.setIdColeccion(1L);
@@ -136,7 +135,7 @@ public class UsuarioColeccionControllerTest {
     }
 
     @Test
-    public void testCrearUsuarioColeccionBodyInvalido() throws Exception {
+    public void crearUsuarioColeccion_bodyInvalido_devuelve400() throws Exception {
         mockMvc.perform(post("/usuario-colecciones")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -146,7 +145,7 @@ public class UsuarioColeccionControllerTest {
     }
 
     @Test
-    public void testCrearUsuarioColeccionUsuarioNoExiste() throws Exception {
+    public void crearUsuarioColeccion_usuarioNoExiste_devuelve404() throws Exception {
         UsuarioColeccionInDTO inDTO = new UsuarioColeccionInDTO();
         inDTO.setIdUsuario(999L);
         inDTO.setIdColeccion(1L);
@@ -162,7 +161,7 @@ public class UsuarioColeccionControllerTest {
     }
 
     @Test
-    public void testCrearUsuarioColeccionColeccionNoExiste() throws Exception {
+    public void crearUsuarioColeccion_coleccionNoExiste_devuelve404() throws Exception {
         UsuarioColeccionInDTO inDTO = new UsuarioColeccionInDTO();
         inDTO.setIdUsuario(1L);
         inDTO.setIdColeccion(999L);
@@ -178,26 +177,21 @@ public class UsuarioColeccionControllerTest {
     }
 
     @Test
-    public void testCrearUsuarioColeccionRelacionYaExiste() throws Exception {
-        UsuarioColeccionInDTO inDTO = new UsuarioColeccionInDTO();
-        inDTO.setIdUsuario(1L);
-        inDTO.setIdColeccion(1L);
-
+    public void crearUsuarioColeccion_relacionDuplicada_devuelve400() throws Exception {
         when(usuarioColeccionService.crear(any(UsuarioColeccionInDTO.class), anyString(), anyBoolean(), anyBoolean()))
-                .thenThrow(new RelacionYaExisteException());
+                .thenThrow(new RelacionYaExisteException("La relación ya existe"));
 
         mockMvc.perform(post("/usuario-colecciones")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(inDTO)))
+                        .content(objectMapper.writeValueAsString(new UsuarioColeccionInDTO())))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    public void testModificarUsuarioColeccionExistente() throws Exception {
+    public void modificarUsuarioColeccion_existente_devuelve200() throws Exception {
         UsuarioColeccionPutDTO putDTO = new UsuarioColeccionPutDTO();
         putDTO.setEsFavorita(true);
-        // putDTO.setEsCreador(true);
 
         UsuarioColeccionOutDTO outDTO = new UsuarioColeccionOutDTO();
         outDTO.setId(1L);
@@ -215,7 +209,7 @@ public class UsuarioColeccionControllerTest {
     }
 
     @Test
-    public void testModificarUsuarioColeccionNoExiste() throws Exception {
+    public void modificarUsuarioColeccion_noExiste_devuelve404() throws Exception {
         UsuarioColeccionPutDTO putDTO = new UsuarioColeccionPutDTO();
         putDTO.setEsFavorita(true);
 
@@ -230,7 +224,7 @@ public class UsuarioColeccionControllerTest {
     }
 
     @Test
-    public void testModificarUsuarioColeccionJsonNoParseable() throws Exception {
+    public void modificarUsuarioColeccion_jsonInvalido_devuelve500() throws Exception {
         mockMvc.perform(put("/usuario-colecciones/1")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -240,7 +234,7 @@ public class UsuarioColeccionControllerTest {
     }
 
     @Test
-    public void testActualizarFavorita() throws Exception {
+    public void actualizarFavorita_relacionExistente_devuelve200() throws Exception {
         UsuarioColeccionFavoritaDTO favDTO = new UsuarioColeccionFavoritaDTO();
         favDTO.setEsFavorita(true);
 
@@ -260,7 +254,7 @@ public class UsuarioColeccionControllerTest {
     }
 
     @Test
-    public void testActualizarFavoritaNoExiste() throws Exception {
+    public void actualizarFavorita_noExiste_devuelve404() throws Exception {
         UsuarioColeccionFavoritaDTO favDTO = new UsuarioColeccionFavoritaDTO();
         favDTO.setEsFavorita(true);
 
@@ -275,7 +269,7 @@ public class UsuarioColeccionControllerTest {
     }
 
     @Test
-    public void testActualizarFavoritaBodyInvalido() throws Exception {
+    public void actualizarFavorita_bodyInvalido_devuelve400() throws Exception {
         mockMvc.perform(patch("/usuario-colecciones/1/favorita")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -284,7 +278,7 @@ public class UsuarioColeccionControllerTest {
     }
 
     @Test
-    public void testActualizarVisible() throws Exception {
+    public void actualizarVisible_relacionExistente_devuelve200() throws Exception {
         UsuarioColeccionVisibleDTO visibleDTO = new UsuarioColeccionVisibleDTO();
         visibleDTO.setEsVisible(false);
 
@@ -304,7 +298,7 @@ public class UsuarioColeccionControllerTest {
     }
 
     @Test
-    public void testActualizarVisibleNoExiste() throws Exception {
+    public void actualizarVisible_noExiste_devuelve404() throws Exception {
         UsuarioColeccionVisibleDTO visibleDTO = new UsuarioColeccionVisibleDTO();
         visibleDTO.setEsVisible(true);
 
@@ -319,7 +313,7 @@ public class UsuarioColeccionControllerTest {
     }
 
     @Test
-    public void testActualizarVisibleBodyInvalido() throws Exception {
+    public void actualizarVisible_bodyInvalido_devuelve400() throws Exception {
         mockMvc.perform(patch("/usuario-colecciones/1/visible")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -328,14 +322,14 @@ public class UsuarioColeccionControllerTest {
     }
 
     @Test
-    public void testEliminarUsuarioColeccionExistente() throws Exception {
+    public void eliminarUsuarioColeccion_existente_devuelve204() throws Exception {
         mockMvc.perform(delete("/usuario-colecciones/1")
                         .with(csrf()))
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    public void testEliminarUsuarioColeccionNoExiste() throws Exception {
+    public void eliminarUsuarioColeccion_noExiste_devuelve404() throws Exception {
         doThrow(new UsuarioColeccionNoEncontradoException(1L))
                 .when(usuarioColeccionService).eliminar(eq(1L),anyString(),anyBoolean(),anyBoolean());
 

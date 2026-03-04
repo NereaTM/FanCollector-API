@@ -49,8 +49,7 @@ public class UsuarioColeccionServiceImpl implements UsuarioColeccionService {
     private UsuarioItemRepository usuarioItemRepository;
 
     @Override
-    public UsuarioColeccionOutDTO crear(UsuarioColeccionInDTO dto, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws UsuarioNoEncontradoException, ColeccionNoEncontradaException {
+    public UsuarioColeccionOutDTO crear(UsuarioColeccionInDTO dto, String emailUsuario, boolean esAdmin, boolean esMods) {
 
         Usuario usuarioActual = currentUserResolver.usuarioActual(emailUsuario);
         if (!esAdmin && !dto.getIdUsuario().equals(usuarioActual.getId()))
@@ -79,8 +78,7 @@ public class UsuarioColeccionServiceImpl implements UsuarioColeccionService {
     }
 
     @Override
-    public UsuarioColeccionOutDTO buscarPorId(Long id, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws UsuarioColeccionNoEncontradoException {
+    public UsuarioColeccionOutDTO buscarPorId(Long id, String emailUsuario, boolean esAdmin, boolean esMods) {
         UsuarioColeccion uc = usuarioColeccionRepository.findById(id)
                 .orElseThrow(() -> new UsuarioColeccionNoEncontradoException(id));
 
@@ -108,7 +106,10 @@ public class UsuarioColeccionServiceImpl implements UsuarioColeccionService {
             relaciones = usuarioColeccionRepository.buscarPorFiltros(idUsuario, idColeccion, soloFavoritas, esVisible);
         }
 
-        Usuario usuarioActual = currentUserResolver.usuarioActual(emailUsuario);
+        Usuario usuarioActual = null;
+        if (emailUsuario != null && !emailUsuario.isBlank()) {
+            usuarioActual = currentUserResolver.usuarioActual(emailUsuario);
+        }
 
         List<UsuarioColeccionOutDTO> resultado = new ArrayList<>();
         for (UsuarioColeccion uc : relaciones) {
@@ -120,8 +121,7 @@ public class UsuarioColeccionServiceImpl implements UsuarioColeccionService {
     }
 
     @Override
-    public UsuarioColeccionOutDTO actualizar(Long id, UsuarioColeccionPutDTO dto, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws UsuarioColeccionNoEncontradoException {
+    public UsuarioColeccionOutDTO actualizar(Long id, UsuarioColeccionPutDTO dto, String emailUsuario, boolean esAdmin, boolean esMods) {
 
         UsuarioColeccion existente = usuarioColeccionRepository.findById(id)
                 .orElseThrow(() -> new UsuarioColeccionNoEncontradoException(id));
@@ -140,8 +140,7 @@ public class UsuarioColeccionServiceImpl implements UsuarioColeccionService {
     }
 
     @Override
-    public UsuarioColeccionOutDTO actualizarFavorita(Long id, UsuarioColeccionFavoritaDTO dto, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws UsuarioColeccionNoEncontradoException {
+    public UsuarioColeccionOutDTO actualizarFavorita(Long id, UsuarioColeccionFavoritaDTO dto, String emailUsuario, boolean esAdmin, boolean esMods) {
 
         UsuarioColeccion uc = usuarioColeccionRepository.findById(id)
                 .orElseThrow(() -> new UsuarioColeccionNoEncontradoException(id));
@@ -151,13 +150,12 @@ public class UsuarioColeccionServiceImpl implements UsuarioColeccionService {
 
         uc.setEsFavorita(dto.getEsFavorita());
 
-        usuarioColeccionRepository.save(uc);
-        return modelMapper.map(usuarioColeccionRepository.save(uc),UsuarioColeccionOutDTO.class);
+        UsuarioColeccion guardado = usuarioColeccionRepository.save(uc);
+        return modelMapper.map(guardado, UsuarioColeccionOutDTO.class);
     }
 
     @Override
-    public UsuarioColeccionOutDTO actualizarVisible(Long id, UsuarioColeccionVisibleDTO dto, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws UsuarioColeccionNoEncontradoException {
+    public UsuarioColeccionOutDTO actualizarVisible(Long id, UsuarioColeccionVisibleDTO dto, String emailUsuario, boolean esAdmin, boolean esMods) {
 
         UsuarioColeccion uc = usuarioColeccionRepository.findById(id)
                 .orElseThrow(() -> new UsuarioColeccionNoEncontradoException(id));
@@ -171,8 +169,7 @@ public class UsuarioColeccionServiceImpl implements UsuarioColeccionService {
 
     @Transactional
     @Override
-    public void eliminar(Long id, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws UsuarioColeccionNoEncontradoException {
+    public void eliminar(Long id, String emailUsuario, boolean esAdmin, boolean esMods) {
         UsuarioColeccion uc = usuarioColeccionRepository.findById(id)
                 .orElseThrow(() -> new UsuarioColeccionNoEncontradoException(id));
         Usuario usuarioActual = currentUserResolver.usuarioActual(emailUsuario);

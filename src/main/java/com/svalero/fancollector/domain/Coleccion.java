@@ -29,8 +29,7 @@ public class Coleccion {
     @Column(nullable = false, length = 100)
     private String nombre;
 
-    @Lob
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String descripcion;
 
     @NotBlank

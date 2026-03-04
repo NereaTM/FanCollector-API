@@ -4,8 +4,6 @@ import com.svalero.fancollector.dto.ItemInDTO;
 import com.svalero.fancollector.dto.ItemOutDTO;
 import com.svalero.fancollector.dto.ItemPutDTO;
 import com.svalero.fancollector.dto.patches.ItemRarezaDTO;
-import com.svalero.fancollector.exception.domain.ColeccionNoEncontradaException;
-import com.svalero.fancollector.exception.domain.ItemNoEncontradoException;
 import com.svalero.fancollector.security.auth.SecurityUtils;
 import com.svalero.fancollector.service.ItemService;
 import com.svalero.fancollector.util.ImagenUtil;
@@ -33,8 +31,7 @@ public class ItemController {
     @PostMapping
     public ResponseEntity<?> crearItem(
             @Valid @ModelAttribute  ItemInDTO itemInDTO,
-            Authentication authentication)
-            throws ColeccionNoEncontradaException {
+            Authentication authentication) {
         String email = SecurityUtils.email(authentication);
         boolean esAdmin = SecurityUtils.isAdmin(authentication);
         boolean esMods = SecurityUtils.isMods(authentication);
@@ -65,8 +62,7 @@ public class ItemController {
     @GetMapping("/{id}")
     public ResponseEntity<ItemOutDTO> buscarItem(
             @PathVariable Long id,
-            Authentication authentication)
-            throws ItemNoEncontradoException {
+            Authentication authentication) {
         String email = SecurityUtils.email(authentication);
         boolean esAdmin = SecurityUtils.isAdmin(authentication);
         boolean esMods  = SecurityUtils.isMods(authentication);
@@ -79,8 +75,7 @@ public class ItemController {
     public ResponseEntity<ItemOutDTO> actualizarItem(
             @PathVariable Long id,
             @Valid @ModelAttribute  ItemPutDTO itemPutDTO,
-            Authentication authentication)
-            throws ItemNoEncontradoException, ColeccionNoEncontradaException {
+            Authentication authentication) {
         String email = SecurityUtils.email(authentication);
         boolean esAdmin = SecurityUtils.isAdmin(authentication);
         boolean esMods  = SecurityUtils.isMods(authentication);
@@ -103,8 +98,7 @@ public class ItemController {
     public ResponseEntity<ItemOutDTO> actualizarRareza(
             @PathVariable Long id,
             @Valid @RequestBody ItemRarezaDTO rarezaDTO,
-            Authentication authentication)
-            throws ItemNoEncontradoException {
+            Authentication authentication) {
         String email = SecurityUtils.email(authentication);
         boolean esAdmin = SecurityUtils.isAdmin(authentication);
         boolean esMods  = SecurityUtils.isMods(authentication);
@@ -116,8 +110,7 @@ public class ItemController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarItem(
             @PathVariable Long id,
-            Authentication authentication)
-            throws ItemNoEncontradoException {
+            Authentication authentication) {
         String email = SecurityUtils.email(authentication);
         boolean esAdmin = SecurityUtils.isAdmin(authentication);
         boolean esMods  = SecurityUtils.isMods(authentication);

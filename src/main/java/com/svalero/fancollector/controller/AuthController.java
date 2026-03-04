@@ -36,13 +36,15 @@ public class AuthController {
     private UsuarioRepository usuarioRepository;
 
     @PostMapping("/registro")
-    public ResponseEntity<UsuarioOutDTO> register(@Valid @RequestBody UsuarioInDTO dto) {
+    public ResponseEntity<UsuarioOutDTO> register(
+            @Valid @RequestBody UsuarioInDTO dto) {
         UsuarioOutDTO creado = usuarioService.crearUsuario(dto);
         return new ResponseEntity<>(creado, HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> token(@Valid @RequestBody LoginDTO dto) {
+    public ResponseEntity<?> token(
+            @Valid @RequestBody LoginDTO dto) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getContrasena()));
 

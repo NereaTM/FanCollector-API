@@ -57,7 +57,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public UsuarioOutDTO buscarUsuarioPorId(long id) throws UsuarioNoEncontradoException {
+    public UsuarioOutDTO buscarUsuarioPorId(long id) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new UsuarioNoEncontradoException(id));
 
@@ -66,7 +66,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public UsuarioAdminOutDTO buscarUsuarioPorIdAdmin(long id) throws UsuarioNoEncontradoException {
+    public UsuarioAdminOutDTO buscarUsuarioPorIdAdmin(long id) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new UsuarioNoEncontradoException(id));
         return modelMapper.map(usuario, UsuarioAdminOutDTO.class);
@@ -95,9 +95,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public UsuarioOutDTO modificarUsuario(
-            long id, UsuarioPutDTO usuarioPutDTO, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws UsuarioNoEncontradoException {
+    public UsuarioOutDTO modificarUsuario(long id, UsuarioPutDTO usuarioPutDTO, String emailUsuario, boolean esAdmin, boolean esMods) {
 
         Usuario existente = usuarioRepository.findById(id)
                 .orElseThrow(() -> new UsuarioNoEncontradoException(id));
@@ -123,8 +121,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public UsuarioOutDTO actualizarContrasena(long id, String nuevaContrasena,  String emailUsuario, boolean esAdmin, boolean esMods)
-            throws UsuarioNoEncontradoException {
+    public UsuarioOutDTO actualizarContrasena(long id, String nuevaContrasena, String emailUsuario, boolean esAdmin, boolean esMods) {
 
         Usuario existente = usuarioRepository.findById(id)
                 .orElseThrow(() -> new UsuarioNoEncontradoException(id));
@@ -138,8 +135,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @PreAuthorize("hasRole('ADMIN')")
     @Override
-    public UsuarioOutDTO actualizarRol(long id, RolUsuario nuevoRol, String emailUsuario)
-            throws UsuarioNoEncontradoException {
+    public UsuarioOutDTO actualizarRol(long id, RolUsuario nuevoRol, String emailUsuario) {
 
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new UsuarioNoEncontradoException(id));
@@ -155,8 +151,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public void borrarUsuario(long id, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws UsuarioNoEncontradoException {
+    public void borrarUsuario(long id, String emailUsuario, boolean esAdmin, boolean esMods) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new UsuarioNoEncontradoException(id));
 

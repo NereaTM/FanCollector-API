@@ -8,10 +8,8 @@ import com.svalero.fancollector.domain.enums.EstadoItem;
 import com.svalero.fancollector.dto.UsuarioItemInDTO;
 import com.svalero.fancollector.dto.UsuarioItemOutDTO;
 import com.svalero.fancollector.dto.UsuarioItemPutDTO;
-import com.svalero.fancollector.exception.domain.ColeccionNoEncontradaException;
-import com.svalero.fancollector.exception.domain.ItemNoEncontradoException;
 import com.svalero.fancollector.exception.domain.UsuarioItemNoEncontradoException;
-import com.svalero.fancollector.exception.domain.UsuarioNoEncontradoException;
+import com.svalero.fancollector.exception.security.AccesoDenegadoException;
 import com.svalero.fancollector.exception.validation.RelacionYaExisteException;
 import com.svalero.fancollector.repository.ColeccionRepository;
 import com.svalero.fancollector.repository.ItemRepository;
@@ -58,7 +56,7 @@ public class UsuarioItemServiceTest {
     private CurrentUserResolver currentUserResolver;
 
     @Test
-    public void testCrear() throws UsuarioNoEncontradoException, ItemNoEncontradoException, ColeccionNoEncontradaException {
+    public void crear_datosValidos_devuelveUsuarioItemCreado() {
         boolean esAdmin = false;
         boolean esMods = false;
 
@@ -117,7 +115,7 @@ public class UsuarioItemServiceTest {
     }
 
     @Test
-    public void testCrearRelacionYaExiste() {
+    public void crear_relacionDuplicada_lanzaRelacionYaExisteException() {
         boolean esAdmin = false;
         boolean esMods = false;
 
@@ -141,11 +139,11 @@ public class UsuarioItemServiceTest {
         assertThrows(RelacionYaExisteException.class, () ->
                 usuarioItemService.crear(dto, EMAIL, esAdmin, esMods));
 
-        verify(usuarioItemRepository, times(0)).save(any(UsuarioItem.class));
+        verify(usuarioItemRepository, never()).save(any(UsuarioItem.class));
     }
 
     @Test
-    public void testCrearItemNoPertenece() {
+    public void crear_itemNoperteneceAColeccion_lanzaIllegalArgumentException() {
         boolean esAdmin = true;
         boolean esMods = false;
 
@@ -172,14 +170,41 @@ public class UsuarioItemServiceTest {
         when(coleccionRepository.findById(1L)).thenReturn(Optional.of(coleccion));
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
 
-        assertThrows(RuntimeException.class, () ->
+        assertThrows(IllegalArgumentException.class, () ->
                 usuarioItemService.crear(dto, EMAIL, esAdmin, esMods));
 
         verify(usuarioItemRepository, never()).save(any(UsuarioItem.class));
     }
 
     @Test
-    public void testBuscarPorId() throws UsuarioItemNoEncontradoException {
+    public void crear_sinPermiso_lanzaAccesoDenegadoException() {
+        boolean esAdmin = false;
+        boolean esMods = false;
+
+        UsuarioItemInDTO dto = new UsuarioItemInDTO();
+        dto.setIdUsuario(2L);
+        dto.setIdItem(1L);
+        dto.setIdColeccion(1L);
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setId(1L);
+        usuarioActual.setEmail(EMAIL);
+
+        Usuario usuarioDueno = new Usuario();
+        usuarioDueno.setId(2L);
+
+        when(currentUserResolver.usuarioActual(EMAIL)).thenReturn(usuarioActual);
+        when(usuarioRepository.findById(2L)).thenReturn(Optional.of(usuarioDueno));
+
+        assertThrows(AccesoDenegadoException.class, () ->
+                usuarioItemService.crear(dto, EMAIL, esAdmin, esMods)
+        );
+
+        verify(usuarioItemRepository, never()).save(any(UsuarioItem.class));
+    }
+
+    @Test
+    public void buscarPorId_existente_devuelveUsuarioItem() {
         boolean esAdmin = true;
         boolean esMods = false;
 
@@ -199,7 +224,7 @@ public class UsuarioItemServiceTest {
     }
 
     @Test
-    public void testBuscarPorIdNoEncontrado() {
+    public void buscarPorId_noExiste_lanzaUsuarioItemNoEncontradoException() {
         boolean esAdmin = true;
         boolean esMods = false;
 
@@ -212,7 +237,7 @@ public class UsuarioItemServiceTest {
     }
 
     @Test
-    public void testListar() {
+    public void listar_sinFiltros_devuelveTodos() {
         boolean esAdmin = true;
         boolean esMods = false;
 
@@ -233,7 +258,6 @@ public class UsuarioItemServiceTest {
         UsuarioItemOutDTO dto2 = new UsuarioItemOutDTO();
         dto2.setId(2L);
 
-        when(currentUserResolver.usuarioActual(EMAIL)).thenReturn(usuarioActual);
         when(usuarioItemRepository.findAll()).thenReturn(lista);
         when(modelMapper.map(ui1, UsuarioItemOutDTO.class)).thenReturn(dto1);
         when(modelMapper.map(ui2, UsuarioItemOutDTO.class)).thenReturn(dto2);
@@ -247,7 +271,7 @@ public class UsuarioItemServiceTest {
     }
 
     @Test
-    public void testActualizarCompleto() throws UsuarioItemNoEncontradoException {
+    public void actualizarCompleto_datosValidos_devuelveItemActualizado() {
         boolean esAdmin = true;
         boolean esMods = false;
 
@@ -280,7 +304,27 @@ public class UsuarioItemServiceTest {
     }
 
     @Test
-    public void testActualizarVisibilidad() throws UsuarioItemNoEncontradoException {
+    public void actualizarCompleto_noExiste_lanzaUsuarioItemNoEncontradoException() {
+        boolean esAdmin = true;
+        boolean esMods = false;
+
+        UsuarioItemPutDTO dto = new UsuarioItemPutDTO();
+        dto.setEstado(EstadoItem.EN_CAMINO);
+        dto.setEsVisible(false);
+        dto.setCantidad(2);
+
+        when(usuarioItemRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(UsuarioItemNoEncontradoException.class, () ->
+                usuarioItemService.actualizarCompleto(999L, dto, EMAIL, esAdmin, esMods)
+        );
+
+        verify(usuarioItemRepository, times(1)).findById(999L);
+        verify(usuarioItemRepository, never()).save(any(UsuarioItem.class));
+    }
+
+    @Test
+    public void actualizarVisibilidad_itemExistente_actualizaVisibilidad() {
         boolean esAdmin = true;
         boolean esMods = false;
 
@@ -304,7 +348,22 @@ public class UsuarioItemServiceTest {
     }
 
     @Test
-    public void testEliminar() throws UsuarioItemNoEncontradoException {
+    public void actualizarVisibilidad_noExiste_lanzaUsuarioItemNoEncontradoException() {
+        boolean esAdmin = true;
+        boolean esMods = false;
+
+        when(usuarioItemRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(UsuarioItemNoEncontradoException.class, () ->
+                usuarioItemService.actualizarVisibilidad(999L, false, EMAIL, esAdmin, esMods)
+        );
+
+        verify(usuarioItemRepository, times(1)).findById(999L);
+        verify(usuarioItemRepository, never()).save(any(UsuarioItem.class));
+    }
+
+    @Test
+    public void eliminar_existente_eliminaCorrectamente() {
         boolean esAdmin = true;
         boolean esMods = false;
 
@@ -320,7 +379,7 @@ public class UsuarioItemServiceTest {
     }
 
     @Test
-    public void testEliminarNoEncontrado() {
+    public void eliminar_noExiste_lanzaUsuarioItemNoEncontradoException() {
         boolean esAdmin = true;
         boolean esMods = false;
 
@@ -330,11 +389,11 @@ public class UsuarioItemServiceTest {
                 usuarioItemService.eliminar(999L, EMAIL, esAdmin, esMods));
 
         verify(usuarioItemRepository, times(1)).findById(999L);
-        verify(usuarioItemRepository, times(0)).deleteById(anyLong());
+        verify(usuarioItemRepository, never()).deleteById(anyLong());
     }
 
     @Test
-    public void testCrearEstadoBuscoNormalizaCantidad() throws UsuarioItemNoEncontradoException {
+    public void crear_estadoBusco_normalizaCantidadACero() {
         boolean esAdmin = true;
         boolean esMods = false;
 
