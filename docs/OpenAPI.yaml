@@ -33,6 +33,7 @@ components:
       type: string
       enum:
         - USER
+        - MODS
         - ADMIN
       example: USER
 
@@ -116,6 +117,10 @@ components:
         usableComoPlantilla:
           type: boolean
           example: false
+        archivo:
+          type: string
+          format: binary
+          description: Imagen (jpg, png, gif, máx 15MB)
 
     ItemInDTO:
       type: object
@@ -147,6 +152,10 @@ components:
         anioLanzamiento:
           type: integer
           example: 2020
+        archivo:
+          type: string
+          format: binary
+          description: Imagen (jpg, png, gif, máx 15MB)
 
     UsuarioColeccionInDTO:
       type: object
@@ -208,6 +217,34 @@ components:
           example: 2
 
     # DTOs PUT
+    UsuarioPutDTO:
+      type: object
+      required:
+        - nombre
+        - email
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          example: Nerea Updated
+        email:
+          type: string
+          format: email
+          example: nerea.updated@gmail.com
+        urlAvatar:
+          type: string
+          example: ejemplo/avatar-nuevo.jpg
+        descripcion:
+          type: string
+          example: Fan de BTS, anime y Pokemon
+        contactoPublico:
+          type: string
+          example: "@nereanew"
+        archivo:
+          type: string
+          format: binary
+          description: Imagen (jpg, png, gif, máx 15MB)
+
     ColeccionPutDTO:
       type: object
       required:
@@ -234,6 +271,10 @@ components:
         usableComoPlantilla:
           type: boolean
           example: true
+        archivo:
+          type: string
+          format: binary
+          description: Imagen (jpg, png, gif, máx 15MB)
 
     ItemPutDTO:
       type: object
@@ -260,6 +301,10 @@ components:
         anioLanzamiento:
           type: integer
           example: 2021
+        archivo:
+          type: string
+          format: binary
+          description: Imagen (jpg, png, gif, máx 15MB)
 
     UsuarioColeccionPutDTO:
       type: object
@@ -384,6 +429,76 @@ components:
           type: string
           format: date-time
           example: "2025-12-01T10:30:00"
+
+    UsuarioRolDTO:
+      type: object
+      required:
+        - rol
+      properties:
+        rol:
+          $ref: '#/components/schemas/RolUsuario'
+
+    UsuarioAdminOutDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        nombre:
+          type: string
+          example: Nerea Test
+        email:
+          type: string
+          format: email
+          example: nerea.test@gmail.com
+        rol:
+          $ref: '#/components/schemas/RolUsuario'
+        urlAvatar:
+          type: string
+          example: ejemplo/avatar.jpg
+        descripcion:
+          type: string
+          example: Fan de BTS y anime
+        contactoPublico:
+          type: string
+          example: "@nereatest"
+        fechaRegistro:
+          type: string
+          format: date-time
+          example: "2025-12-01T10:30:00"
+        contrasena:
+          type: string
+          example: "$2a$10$hashedpassword..."
+
+    LoginDTO:
+      type: object
+      required:
+        - email
+        - contrasena
+      properties:
+        email:
+          type: string
+          format: email
+          example: nerea@gmail.com
+        contrasena:
+          type: string
+          example: password123
+
+    LoginResponseDTO:
+      type: object
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiJ9...
+        email:
+          type: string
+          example: nerea@gmail.com
+        nombre:
+          type: string
+          example: Nerea
+        rol:
+          $ref: '#/components/schemas/RolUsuario'
 
     ColeccionOutDTO:
       type: object
@@ -626,6 +741,16 @@ paths:
                     statusCode: 400
                     message: El email nerea.test@gmail.com ya esta registrado
                     errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -790,9 +915,9 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/UsuarioInDTO'
+              $ref: '#/components/schemas/UsuarioPutDTO'
             examples:
               actualizacionBasica:
                 summary: Actualizacion basica
@@ -861,6 +986,16 @@ paths:
                 statusCode: 404
                 message: Usuario con id 999 no encontrado
                 errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -889,6 +1024,167 @@ paths:
       responses:
         '204':
           description: Usuario eliminado exitosamente
+        '404':
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 404
+                message: Usuario con id 999 no encontrado
+                errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 500
+                message: Error interno del servidor
+                errors: { }
+
+  /usuarios/{id}/admin:
+    get:
+      tags:
+        - Usuarios
+      summary: Obtener usuario con datos de administrador
+      description: Recupera la información completa de un usuario, incluyendo datos sensibles. Solo accesible por administradores.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del usuario
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: Usuario encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioAdminOutDTO'
+              example:
+                id: 1
+                nombre: Nerea Test
+                email: nerea.test@gmail.com
+                rol: USER
+                urlAvatar: ejemplo/avatar.jpg
+                descripcion: Fan de BTS y anime
+                contactoPublico: "@nereatest"
+                fechaRegistro: "2025-12-01T10:30:00"
+                contrasena: "$2a$10$hashedpassword..."
+        '404':
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 404
+                message: Usuario con id 999 no encontrado
+                errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 500
+                message: Error interno del servidor
+                errors: { }
+
+  /usuarios/{id}/rol:
+    patch:
+      tags:
+        - Usuarios
+      summary: Actualizar rol de usuario
+      description: Cambia el rol de un usuario. Solo accesible por administradores.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del usuario
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsuarioRolDTO'
+            examples:
+              ascenderAMods:
+                summary: Ascender a moderador
+                value:
+                  rol: MODS
+              ascenderAAdmin:
+                summary: Ascender a administrador
+                value:
+                  rol: ADMIN
+      responses:
+        '200':
+          description: Rol actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioOutDTO'
+              example:
+                id: 1
+                nombre: Nerea Test
+                email: nerea.test@gmail.com
+                rol: MODS
+                urlAvatar: ejemplo/avatar.jpg
+                descripcion: Fan de BTS y anime
+                contactoPublico: "@nereatest"
+                fechaRegistro: "2025-12-01T10:30:00"
+        '400':
+          description: Rol invalido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 400
+                message: Errores de validacion
+                errors:
+                  rol: El rol no puede ser nulo
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '404':
           description: Usuario no encontrado
           content:
@@ -980,6 +1276,16 @@ paths:
                 statusCode: 404
                 message: Usuario con id 999 no encontrado
                 errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -1000,7 +1306,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/ColeccionInDTO'
             examples:
@@ -1177,7 +1483,7 @@ paths:
                 message: Error interno del servidor
                 errors: { }
 
-  /coleccione/{id}:
+  /colecciones/{id}:
     get:
       tags:
         - Colecciones
@@ -1264,7 +1570,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/ColeccionPutDTO'
             examples:
@@ -1329,6 +1635,16 @@ paths:
                 statusCode: 404
                 message: Coleccion con id 999 no encontrada
                 errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -1367,6 +1683,16 @@ paths:
                 statusCode: 404
                 message: Coleccion con id 999 no encontrada
                 errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -1378,7 +1704,7 @@ paths:
                 message: Error interno del servidor
                 errors: { }
 
-  /coleccione/{id}/publico:
+  /colecciones/{id}/publico:
     patch:
       tags:
         - Colecciones
@@ -1463,6 +1789,16 @@ paths:
                 statusCode: 404
                 message: Coleccion con id 999 no encontrada
                 errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -1474,7 +1810,7 @@ paths:
                 message: Error interno del servidor
                 errors: { }
 
-  /coleccione/{id}/plantilla:
+  /colecciones/{id}/plantilla:
     patch:
       tags:
         - Colecciones
@@ -1559,6 +1895,16 @@ paths:
                 statusCode: 404
                 message: Coleccion con id 999 no encontrada
                 errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -1579,7 +1925,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/ItemInDTO'
             examples:
@@ -1833,7 +2179,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/ItemPutDTO'
             examples:
@@ -1897,6 +2243,16 @@ paths:
                 statusCode: 404
                 message: Item con id 999 no encontrado
                 errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -1934,6 +2290,16 @@ paths:
               example:
                 statusCode: 404
                 message: Item con id 999 no encontrado
+                errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
                 errors: { }
         '500':
           description: Error interno del servidor
@@ -2028,6 +2394,16 @@ paths:
               example:
                 statusCode: 404
                 message: Item con id 999 no encontrado
+                errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
                 errors: { }
         '500':
           description: Error interno del servidor
@@ -2133,6 +2509,16 @@ paths:
                     statusCode: 404
                     message: Coleccion con id 999 no encontrada
                     errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -2353,6 +2739,16 @@ paths:
                 statusCode: 404
                 message:Usuario-coleccion con ID: 999 no encontrado
                 errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -2390,6 +2786,16 @@ paths:
               example:
                 statusCode: 404
                 message:Usuario-coleccion con ID: 999 no encontrado
+                errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
                 errors: { }
         '500':
           description: Error interno del servidor
@@ -2479,6 +2885,16 @@ paths:
               example:
                 statusCode: 404
                 message:Usuario-coleccion con ID: 999 no encontrado
+                errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
                 errors: { }
         '500':
           description: Error interno del servidor
@@ -2570,6 +2986,16 @@ paths:
                 statusCode: 404
                 message:
                   Usuario-coleccion con ID: 999 no encontrado
+                errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
                 errors: { }
         '500':
           description: Error interno del servidor
@@ -2695,6 +3121,16 @@ paths:
                     statusCode: 404
                     message: Coleccion con id 999 no encontrada
                     errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -2965,6 +3401,16 @@ paths:
                 statusCode: 404
                 message: Usuario-Item con id 999 no encontrado
                 errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -3002,6 +3448,16 @@ paths:
               example:
                 statusCode: 404
                 message: Usuario-Item con id 999 no encontrado
+                errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
                 errors: { }
         '500':
           description: Error interno del servidor
@@ -3103,6 +3559,16 @@ paths:
                 statusCode: 404
                 message: Usuario-Item con id 999 no encontrado
                 errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -3154,7 +3620,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UsuarioOutDTO'
+                $ref: '#/components/schemas/LoginResponseDTO'
               examples:
                 usuarioLogueado:
                   summary: Usuario autenticado correctamente
