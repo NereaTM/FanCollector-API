@@ -49,7 +49,7 @@ public class ColeccionServiceTest {
     private CurrentUserResolver currentUserResolver;
 
     @Test
-    public void testCrearColeccion() throws UsuarioNoEncontradoException {
+    public void crearColeccion_datosValidos_devuelveColeccionCreada() {
         ColeccionInDTO coleccionInDTO = new ColeccionInDTO();
         coleccionInDTO.setIdCreador(1L);
         coleccionInDTO.setNombre("Figuras Anime");
@@ -84,11 +84,11 @@ public class ColeccionServiceTest {
         assertEquals("Figuras Anime", resultado.getNombre());
         verify(currentUserResolver, times(1)).usuarioActual(EMAIL);
         verify(coleccionRepository, times(1)).save(any(Coleccion.class));
-        verify(usuarioColeccionRepository, times(1)).save(any(UsuarioColeccion.class)); // AÑADIR
+        verify(usuarioColeccionRepository, times(1)).save(any(UsuarioColeccion.class));
     }
 
     @Test
-    public void testCrearColeccionUsuarioNoEncontrado() {
+    public void crearColeccion_usuarioNoExiste_lanzaUsuarioNoEncontradoException() {
         ColeccionInDTO coleccionInDTO = new ColeccionInDTO();
 
         when(currentUserResolver.usuarioActual(EMAIL)).thenThrow(new UsuarioNoEncontradoException(999L));
@@ -98,12 +98,12 @@ public class ColeccionServiceTest {
         });
 
         verify(currentUserResolver, times(1)).usuarioActual(EMAIL);
-        verify(coleccionRepository, times(0)).save(any(Coleccion.class));
+        verify(coleccionRepository, never()).save(any(Coleccion.class));
         verifyNoInteractions(usuarioRepository);
     }
 
     @Test
-    public void testBuscarColeccionPorId() throws ColeccionNoEncontradaException {
+    public void buscarColeccionPorId_existente_devuelveColeccion() {
         boolean esAdmin = true;
         boolean esMods = false;
 
@@ -126,7 +126,7 @@ public class ColeccionServiceTest {
     }
 
     @Test
-    public void testBuscarColeccionPorIdNoEncontrada() {
+    public void buscarColeccionPorId_noExiste_lanzaColeccionNoEncontradaException() {
         boolean esAdmin = true;
         boolean esMods = false;
 
@@ -140,7 +140,7 @@ public class ColeccionServiceTest {
     }
 
     @Test
-    public void testListarColecciones() {
+    public void listarColecciones_sinFiltros_devuelveTodas() {
         boolean esAdmin = true;
         boolean esMods = false;
 
@@ -175,7 +175,7 @@ public class ColeccionServiceTest {
     }
 
     @Test
-    public void testActualizarColeccion() throws ColeccionNoEncontradaException {
+    public void actualizarColeccion_datosValidos_devuelveColeccionActualizada() {
         boolean esAdmin = true;
         boolean esMods = false;
 
@@ -209,7 +209,26 @@ public class ColeccionServiceTest {
     }
 
     @Test
-    public void testActualizarEsPublica() throws ColeccionNoEncontradaException, UsuarioNoEncontradoException {
+    public void actualizarColeccion_noExiste_lanzaColeccionNoEncontradaException() {
+        boolean esAdmin = true;
+        boolean esMods = false;
+
+        ColeccionPutDTO coleccionPutDTO = new ColeccionPutDTO();
+        coleccionPutDTO.setNombre("Figuras Anime");
+        coleccionPutDTO.setCategoria("Anime");
+
+        when(coleccionRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(ColeccionNoEncontradaException.class, () ->
+                coleccionService.actualizarColeccion(999L, coleccionPutDTO, EMAIL, esAdmin, esMods)
+        );
+
+        verify(coleccionRepository, times(1)).findById(999L);
+        verify(coleccionRepository, never()).save(any(Coleccion.class));
+    }
+
+    @Test
+    public void actualizarEsPublica_coleccionExistente_actualizaVisibilidad() {
         boolean esAdmin = true;
         boolean esMods = false;
 
@@ -234,7 +253,22 @@ public class ColeccionServiceTest {
     }
 
     @Test
-    public void testActualizarUsableComoPlantilla() throws ColeccionNoEncontradaException, UsuarioNoEncontradoException {
+    public void actualizarEsPublica_noExiste_lanzaColeccionNoEncontradaException() {
+        boolean esAdmin = true;
+        boolean esMods = false;
+
+        when(coleccionRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(ColeccionNoEncontradaException.class, () ->
+                coleccionService.actualizarEsPublica(999L, true, EMAIL, esAdmin, esMods)
+        );
+
+        verify(coleccionRepository, times(1)).findById(999L);
+        verify(coleccionRepository, never()).save(any(Coleccion.class));
+    }
+
+    @Test
+    public void actualizarUsableComoPlantilla_coleccionExistente_actualizaPlantilla() {
         boolean esAdmin = true;
 
         Coleccion coleccion = new Coleccion();
@@ -257,7 +291,21 @@ public class ColeccionServiceTest {
     }
 
     @Test
-    public void testEliminarColeccion() throws ColeccionNoEncontradaException {
+    public void actualizarUsableComoPlantilla_noExiste_lanzaColeccionNoEncontradaException() {
+        boolean esAdmin = true;
+
+        when(coleccionRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(ColeccionNoEncontradaException.class, () ->
+                coleccionService.actualizarUsableComoPlantilla(999L, true, EMAIL, esAdmin)
+        );
+
+        verify(coleccionRepository, times(1)).findById(999L);
+        verify(coleccionRepository, never()).save(any(Coleccion.class));
+    }
+
+    @Test
+    public void eliminarColeccion_existente_eliminaCorrectamente() {
         boolean esAdmin = true;
         boolean esMods = false;
 
@@ -273,7 +321,7 @@ public class ColeccionServiceTest {
     }
 
     @Test
-    public void testEliminarColeccionNoEncontrada() {
+    public void eliminarColeccion_noExiste_lanzaColeccionNoEncontradaException() {
         boolean esAdmin = true;
         boolean esMods = false;
 
@@ -283,6 +331,6 @@ public class ColeccionServiceTest {
             coleccionService.eliminarColeccion(999L, EMAIL, esAdmin, esMods);});
 
         verify(coleccionRepository, times(1)).findById(999L);
-        verify(coleccionRepository, times(0)).delete(any(Coleccion.class));
+        verify(coleccionRepository, never()).delete(any(Coleccion.class));
     }
 }

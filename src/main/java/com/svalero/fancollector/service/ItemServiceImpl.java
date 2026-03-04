@@ -46,8 +46,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public ItemOutDTO crearItem(ItemInDTO datosItem, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws ColeccionNoEncontradaException  {
+    public ItemOutDTO crearItem(ItemInDTO datosItem, String emailUsuario, boolean esAdmin, boolean esMods) {
 
         Coleccion coleccion = coleccionRepository.findById(datosItem.getIdColeccion())
                 .orElseThrow(() -> new ColeccionNoEncontradaException(datosItem.getIdColeccion()));
@@ -97,8 +96,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemOutDTO buscarItemPorId(Long idItem, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws ItemNoEncontradoException {
+    public ItemOutDTO buscarItemPorId(Long idItem, String emailUsuario, boolean esAdmin, boolean esMods) {
         Item item = itemRepository.findById(idItem)
                 .orElseThrow(() -> new ItemNoEncontradoException(idItem));
         Usuario actual = currentUserResolver.usuarioActual(emailUsuario);
@@ -144,8 +142,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemOutDTO actualizarItem(Long idItem, ItemPutDTO datosItem, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws ItemNoEncontradoException, UsuarioNoEncontradoException {
+    public ItemOutDTO actualizarItem(Long idItem, ItemPutDTO datosItem, String emailUsuario, boolean esAdmin, boolean esMods) {
 
         Item existente = itemRepository.findById(idItem)
                 .orElseThrow(() -> new ItemNoEncontradoException(idItem));
@@ -173,8 +170,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemOutDTO actualizarRareza(Long id, RarezaItem rareza, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws ItemNoEncontradoException, UsuarioNoEncontradoException {
+    public ItemOutDTO actualizarRareza(Long id, RarezaItem rareza, String emailUsuario, boolean esAdmin, boolean esMods) {
 
         Item item = itemRepository.findById(id)
                 .orElseThrow(() -> new ItemNoEncontradoException(id));
@@ -190,8 +186,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public void eliminarItem(Long idItem, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws ItemNoEncontradoException, UsuarioNoEncontradoException {
+    public void eliminarItem(Long idItem, String emailUsuario, boolean esAdmin, boolean esMods) {
 
         Item item = itemRepository.findById(idItem)
                 .orElseThrow(() -> new ItemNoEncontradoException(idItem));

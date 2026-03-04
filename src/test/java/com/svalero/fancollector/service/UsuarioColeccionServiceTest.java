@@ -8,12 +8,12 @@ import com.svalero.fancollector.dto.UsuarioColeccionOutDTO;
 import com.svalero.fancollector.dto.UsuarioColeccionPutDTO;
 import com.svalero.fancollector.dto.patches.UsuarioColeccionFavoritaDTO;
 import com.svalero.fancollector.dto.patches.UsuarioColeccionVisibleDTO;
-import com.svalero.fancollector.exception.domain.ColeccionNoEncontradaException;
 import com.svalero.fancollector.exception.domain.UsuarioColeccionNoEncontradoException;
-import com.svalero.fancollector.exception.domain.UsuarioNoEncontradoException;
+import com.svalero.fancollector.exception.security.AccesoDenegadoException;
 import com.svalero.fancollector.exception.validation.RelacionYaExisteException;
 import com.svalero.fancollector.repository.ColeccionRepository;
 import com.svalero.fancollector.repository.UsuarioColeccionRepository;
+import com.svalero.fancollector.repository.UsuarioItemRepository;
 import com.svalero.fancollector.repository.UsuarioRepository;
 import com.svalero.fancollector.security.auth.CurrentUserResolver;
 import org.junit.jupiter.api.Test;
@@ -47,13 +47,16 @@ public class UsuarioColeccionServiceTest {
     private ColeccionRepository coleccionRepository;
 
     @Mock
+    private UsuarioItemRepository usuarioItemRepository;
+
+    @Mock
     private ModelMapper modelMapper;
 
     @Mock
     private CurrentUserResolver currentUserResolver;
 
     @Test
-    public void testCrear() throws UsuarioNoEncontradoException, ColeccionNoEncontradaException {
+    public void crear_datosValidos_devuelveRelacionCreada() {
         boolean esAdmin = false;
         boolean esMods = false;
 
@@ -71,6 +74,8 @@ public class UsuarioColeccionServiceTest {
 
         Coleccion coleccion = new Coleccion();
         coleccion.setId(1L);
+        coleccion.setEsPublica(true);
+        coleccion.setUsableComoPlantilla(true);
 
         UsuarioColeccion ucMapeado = new UsuarioColeccion();
         ucMapeado.setEsFavorita(false);
@@ -102,7 +107,7 @@ public class UsuarioColeccionServiceTest {
     }
 
     @Test
-    public void testCrearRelacionYaExiste() {
+    public void crear_relacionDuplicada_lanzaRelacionYaExisteException() {
         boolean esAdmin = false;
         boolean esMods = false;
 
@@ -118,6 +123,8 @@ public class UsuarioColeccionServiceTest {
 
         Coleccion coleccion = new Coleccion();
         coleccion.setId(1L);
+        coleccion.setEsPublica(true);
+        coleccion.setUsableComoPlantilla(true);
 
         when(currentUserResolver.usuarioActual(EMAIL)).thenReturn(usuarioActual);
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
@@ -128,11 +135,32 @@ public class UsuarioColeccionServiceTest {
                 usuarioColeccionService.crear(dto, EMAIL, esAdmin, esMods)
         );
 
-        verify(usuarioColeccionRepository, times(0)).save(any(UsuarioColeccion.class));
+        verify(usuarioColeccionRepository, never()).save(any(UsuarioColeccion.class));
     }
 
     @Test
-    public void testBuscarPorId() throws UsuarioColeccionNoEncontradoException {
+    public void crear_coleccionNoPublicaNiPlantilla_lanzaAccesoDenegadoException() {
+        boolean esAdmin = false;
+        boolean esMods = false;
+
+        UsuarioColeccionInDTO dto = new UsuarioColeccionInDTO();
+        dto.setIdUsuario(1L);
+        dto.setIdColeccion(1L);
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setId(2L);
+
+        when(currentUserResolver.usuarioActual(EMAIL)).thenReturn(usuarioActual);
+
+        assertThrows(AccesoDenegadoException.class, () ->
+                usuarioColeccionService.crear(dto, EMAIL, esAdmin, esMods)
+        );
+
+        verify(usuarioColeccionRepository, never()).save(any(UsuarioColeccion.class));
+    }
+
+    @Test
+    public void buscarPorId_existente_devuelveRelacion() {
         boolean esAdmin = true;
         boolean esMods = false;
 
@@ -152,7 +180,7 @@ public class UsuarioColeccionServiceTest {
     }
 
     @Test
-    public void testBuscarPorIdNoEncontrado() {
+    public void buscarPorId_noExiste_lanzaUsuarioColeccionNoEncontradoException() {
         boolean esAdmin = true;
         boolean esMods = false;
 
@@ -166,7 +194,7 @@ public class UsuarioColeccionServiceTest {
     }
 
     @Test
-    public void testListar() {
+    public void listar_sinFiltros_devuelveTodas() {
         boolean esAdmin = false;
         boolean esMods = false;
 
@@ -203,7 +231,7 @@ public class UsuarioColeccionServiceTest {
     }
 
     @Test
-    public void testActualizar() throws UsuarioColeccionNoEncontradoException {
+    public void actualizar_datosValidos_devuelveRelacionActualizada() {
         boolean esAdmin = true;
         boolean esMods = false;
 
@@ -213,7 +241,6 @@ public class UsuarioColeccionServiceTest {
 
         UsuarioColeccionPutDTO dto = new UsuarioColeccionPutDTO();
         dto.setEsFavorita(true);
-       // dto.setEsCreador(true);
 
         UsuarioColeccion ucExistente = new UsuarioColeccion();
         ucExistente.setId(1L);
@@ -239,7 +266,25 @@ public class UsuarioColeccionServiceTest {
     }
 
     @Test
-    public void testActualizarFavorita() throws UsuarioColeccionNoEncontradoException {
+    public void actualizar_noExiste_lanzaUsuarioColeccionNoEncontradoException() {
+        boolean esAdmin = true;
+        boolean esMods = false;
+
+        UsuarioColeccionPutDTO dto = new UsuarioColeccionPutDTO();
+        dto.setEsFavorita(true);
+
+        when(usuarioColeccionRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(UsuarioColeccionNoEncontradoException.class, () ->
+                usuarioColeccionService.actualizar(999L, dto, EMAIL, esAdmin, esMods)
+        );
+
+        verify(usuarioColeccionRepository, times(1)).findById(999L);
+        verify(usuarioColeccionRepository, never()).save(any(UsuarioColeccion.class));
+    }
+
+    @Test
+    public void actualizarFavorita_relacionExistente_actualizaFavorita() {
         boolean esAdmin = true;
         boolean esMods = false;
 
@@ -269,12 +314,30 @@ public class UsuarioColeccionServiceTest {
 
         assertTrue(resultado.getEsFavorita());
         verify(usuarioColeccionRepository, times(1)).findById(1L);
-        verify(usuarioColeccionRepository, times(2)).save(any(UsuarioColeccion.class));
+        verify(usuarioColeccionRepository, times(1)).save(any(UsuarioColeccion.class));
         verify(currentUserResolver, times(1)).usuarioActual(EMAIL);
     }
 
     @Test
-    public void testActualizarVisible() throws UsuarioColeccionNoEncontradoException {
+    public void actualizarFavorita_noExiste_lanzaUsuarioColeccionNoEncontradoException() {
+        boolean esAdmin = true;
+        boolean esMods = false;
+
+        UsuarioColeccionFavoritaDTO dto = new UsuarioColeccionFavoritaDTO();
+        dto.setEsFavorita(true);
+
+        when(usuarioColeccionRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(UsuarioColeccionNoEncontradoException.class, () ->
+                usuarioColeccionService.actualizarFavorita(999L, dto, EMAIL, esAdmin, esMods)
+        );
+
+        verify(usuarioColeccionRepository, times(1)).findById(999L);
+        verify(usuarioColeccionRepository, never()).save(any(UsuarioColeccion.class));
+    }
+
+    @Test
+    public void actualizarVisible_relacionExistente_actualizaVisibilidad() {
         boolean esAdmin = true;
         boolean esMods = false;
 
@@ -301,7 +364,7 @@ public class UsuarioColeccionServiceTest {
     }
 
     @Test
-    public void testActualizarVisibleNoEncontrado() {
+    public void actualizarVisible_noExiste_lanzaUsuarioColeccionNoEncontradoException() {
         boolean esAdmin = true;
         boolean esMods = false;
 
@@ -311,31 +374,43 @@ public class UsuarioColeccionServiceTest {
         when(usuarioColeccionRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(UsuarioColeccionNoEncontradoException.class, () ->
-            usuarioColeccionService.eliminar(999L, EMAIL, esAdmin, esMods)
+                        usuarioColeccionService.actualizarVisible(999L, dto, EMAIL, esAdmin, esMods)
         );
 
         verify(usuarioColeccionRepository, times(1)).findById(999L);
-        verify(usuarioColeccionRepository, times(0)).save(any(UsuarioColeccion.class));
+        verify(usuarioColeccionRepository, never()).save(any(UsuarioColeccion.class));
     }
 
     @Test
-    public void testEliminar() throws UsuarioColeccionNoEncontradoException {
+    public void eliminar_existente_eliminaRelacionYSusItems() {
         boolean esAdmin = true;
         boolean esMods = false;
 
+        Usuario usuario = new Usuario();
+        usuario.setId(1L);
+        usuario.setEmail(EMAIL);
+
+        Coleccion coleccion = new Coleccion();
+        coleccion.setId(1L);
+
         UsuarioColeccion uc = new UsuarioColeccion();
         uc.setId(1L);
+        uc.setUsuario(usuario);
+        uc.setColeccion(coleccion);
 
         when(usuarioColeccionRepository.findById(1L)).thenReturn(Optional.of(uc));
+        when(currentUserResolver.usuarioActual(EMAIL)).thenReturn(usuario);
 
         usuarioColeccionService.eliminar(1L, EMAIL, esAdmin, esMods);
 
         verify(usuarioColeccionRepository, times(1)).findById(1L);
+        verify(usuarioItemRepository, times(1))
+                .deleteByUsuario_IdAndColeccion_Id(1L, 1L);
         verify(usuarioColeccionRepository, times(1)).delete(uc);
     }
 
     @Test
-    public void testEliminarNoEncontrado() {
+    public void eliminar_noExiste_lanzaUsuarioColeccionNoEncontradoException() {
         boolean esAdmin = true;
         boolean esMods = false;
 
@@ -346,6 +421,6 @@ public class UsuarioColeccionServiceTest {
         );
 
         verify(usuarioColeccionRepository, times(1)).findById(999L);
-        verify(usuarioColeccionRepository, times(0)).delete(any(UsuarioColeccion.class));
+        verify(usuarioColeccionRepository, never()).delete(any(UsuarioColeccion.class));
     }
 }

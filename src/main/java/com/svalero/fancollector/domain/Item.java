@@ -29,8 +29,8 @@ public class Item {
     @Column(nullable = false, length = 150)
     private String nombre;
 
-    @Lob
-    @Column
+
+    @Column(columnDefinition = "TEXT")
     private String descripcion;
 
     @Column(name = "imagen_url", length = 500)

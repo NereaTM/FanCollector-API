@@ -39,8 +39,7 @@ public class ColeccionServiceImpl implements ColeccionService {
 
     @Override
     @Transactional
-    public ColeccionOutDTO crearColeccion(ColeccionInDTO coleccionInDto, String emailUsuario)
-            throws UsuarioNoEncontradoException {
+    public ColeccionOutDTO crearColeccion(ColeccionInDTO coleccionInDto, String emailUsuario) {
 
         Usuario creador = currentUserResolver.usuarioActual(emailUsuario);
 
@@ -62,8 +61,7 @@ public class ColeccionServiceImpl implements ColeccionService {
     }
 
     @Override
-    public ColeccionOutDTO buscarColeccionPorId(Long id, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws ColeccionNoEncontradaException {
+    public ColeccionOutDTO buscarColeccionPorId(Long id, String emailUsuario, boolean esAdmin, boolean esMods) {
         Coleccion coleccion = coleccionRepository.findById(id)
                 .orElseThrow(() -> new ColeccionNoEncontradaException(id));
         // sin logearme
@@ -112,8 +110,7 @@ public class ColeccionServiceImpl implements ColeccionService {
     }
 
     @Override
-    public ColeccionOutDTO actualizarColeccion(Long id, ColeccionPutDTO coleccionPutDTO, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws ColeccionNoEncontradaException, UsuarioNoEncontradoException {
+    public ColeccionOutDTO actualizarColeccion(Long id, ColeccionPutDTO coleccionPutDTO, String emailUsuario, boolean esAdmin, boolean esMods) {
 
         Coleccion existente = coleccionRepository.findById(id)
                 .orElseThrow(() -> new ColeccionNoEncontradaException(id));
@@ -132,9 +129,7 @@ public class ColeccionServiceImpl implements ColeccionService {
     }
 
     @Override
-    public ColeccionOutDTO actualizarEsPublica(Long id, Boolean esPublica, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws ColeccionNoEncontradaException, UsuarioNoEncontradoException {
-
+    public ColeccionOutDTO actualizarEsPublica(Long id, Boolean esPublica, String emailUsuario, boolean esAdmin, boolean esMods) {
         Coleccion coleccion = coleccionRepository.findById(id)
                 .orElseThrow(() -> new ColeccionNoEncontradaException(id));
 
@@ -148,8 +143,7 @@ public class ColeccionServiceImpl implements ColeccionService {
     }
 
     @Override
-    public ColeccionOutDTO actualizarUsableComoPlantilla(Long id, Boolean usableComoPlantilla, String emailUsuario, boolean esAdmin)
-            throws ColeccionNoEncontradaException, UsuarioNoEncontradoException {
+    public ColeccionOutDTO actualizarUsableComoPlantilla(Long id, Boolean usableComoPlantilla, String emailUsuario, boolean esAdmin) {
         Coleccion coleccion = coleccionRepository.findById(id)
                 .orElseThrow(() -> new ColeccionNoEncontradaException(id));
 
@@ -163,9 +157,7 @@ public class ColeccionServiceImpl implements ColeccionService {
 
     @Override
     @Transactional
-    public void eliminarColeccion(Long id, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws ColeccionNoEncontradaException, UsuarioNoEncontradoException {
-
+    public void eliminarColeccion(Long id, String emailUsuario, boolean esAdmin, boolean esMods) {
         Coleccion coleccion = coleccionRepository.findById(id)
                 .orElseThrow(() -> new ColeccionNoEncontradaException(id));
 

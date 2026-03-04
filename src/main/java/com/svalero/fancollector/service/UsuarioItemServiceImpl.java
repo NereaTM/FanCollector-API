@@ -49,8 +49,7 @@ public class UsuarioItemServiceImpl implements UsuarioItemService {
     private CurrentUserResolver currentUserResolver;
 
     @Override
-    public UsuarioItemOutDTO crear(UsuarioItemInDTO dto, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws UsuarioNoEncontradoException, ItemNoEncontradoException, ColeccionNoEncontradaException {
+    public UsuarioItemOutDTO crear(UsuarioItemInDTO dto, String emailUsuario, boolean esAdmin, boolean esMods) {
         Usuario usuarioActual = currentUserResolver.usuarioActual(emailUsuario);
         Usuario usuarioDueno;
         if (dto.getIdUsuario() != null) {
@@ -80,7 +79,7 @@ public class UsuarioItemServiceImpl implements UsuarioItemService {
                 .orElseThrow(() -> new ItemNoEncontradoException(dto.getIdItem()));
 
         if (!item.getColeccion().getId().equals(coleccion.getId())) {
-            throw new RuntimeException("El ítem no pertenece a la colección indicada");
+            throw new IllegalArgumentException("El ítem no pertenece a la colección indicada");
         }
 
         EstadoItem estado = dto.getEstado() != null ? dto.getEstado() : EstadoItem.BUSCO;
@@ -100,8 +99,7 @@ public class UsuarioItemServiceImpl implements UsuarioItemService {
     }
 
     @Override
-    public UsuarioItemOutDTO buscarPorId(Long id, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws UsuarioItemNoEncontradoException {
+    public UsuarioItemOutDTO buscarPorId(Long id, String emailUsuario, boolean esAdmin, boolean esMods) {
         UsuarioItem ui = usuarioItemRepository.findById(id)
                 .orElseThrow(() -> new UsuarioItemNoEncontradoException(id));
 
@@ -149,8 +147,7 @@ public class UsuarioItemServiceImpl implements UsuarioItemService {
     }
 
     @Override
-    public UsuarioItemOutDTO actualizarCompleto(Long id, UsuarioItemPutDTO dto, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws UsuarioItemNoEncontradoException {
+    public UsuarioItemOutDTO actualizarCompleto(Long id, UsuarioItemPutDTO dto, String emailUsuario, boolean esAdmin, boolean esMods) {
 
         UsuarioItem existente = usuarioItemRepository.findById(id)
                 .orElseThrow(() -> new UsuarioItemNoEncontradoException(id));
@@ -175,8 +172,7 @@ public class UsuarioItemServiceImpl implements UsuarioItemService {
     }
 
     @Override
-    public UsuarioItemOutDTO actualizarVisibilidad(Long id, Boolean esVisible, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws UsuarioItemNoEncontradoException {
+    public UsuarioItemOutDTO actualizarVisibilidad(Long id, Boolean esVisible, String emailUsuario, boolean esAdmin, boolean esMods) {
 
         UsuarioItem usuarioItem = usuarioItemRepository.findById(id)
                 .orElseThrow(() -> new UsuarioItemNoEncontradoException(id));
@@ -190,8 +186,7 @@ public class UsuarioItemServiceImpl implements UsuarioItemService {
     }
 
     @Override
-    public void eliminar(Long id, String emailUsuario, boolean esAdmin, boolean esMods)
-    throws UsuarioItemNoEncontradoException {
+    public void eliminar(Long id, String emailUsuario, boolean esAdmin, boolean esMods) {
         UsuarioItem usuarioItem = usuarioItemRepository.findById(id)
                 .orElseThrow(() -> new UsuarioItemNoEncontradoException(id));
 

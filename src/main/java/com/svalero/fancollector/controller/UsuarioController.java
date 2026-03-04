@@ -4,7 +4,6 @@ import com.svalero.fancollector.domain.enums.RolUsuario;
 import com.svalero.fancollector.dto.*;
 import com.svalero.fancollector.dto.patches.UsuarioPasswordDTO;
 import com.svalero.fancollector.dto.patches.UsuarioRolDTO;
-import com.svalero.fancollector.exception.domain.UsuarioNoEncontradoException;
 import com.svalero.fancollector.security.auth.SecurityUtils;
 import com.svalero.fancollector.service.UsuarioService;
 import com.svalero.fancollector.util.ImagenUtil;
@@ -31,7 +30,8 @@ public class UsuarioController {
 
     @PostMapping
     public ResponseEntity<UsuarioOutDTO> crearUsuarioComoAdmin(
-            @Valid @RequestBody UsuarioInDTO dto, Authentication authentication) {
+            @Valid @RequestBody UsuarioInDTO dto,
+            Authentication authentication) {
         String emailUsuario = SecurityUtils.email(authentication);
         boolean esAdmin = SecurityUtils.isAdmin(authentication);
 
@@ -51,8 +51,7 @@ public class UsuarioController {
 
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioOutDTO> obtenerUsuario(
-            @PathVariable long id)
-            throws UsuarioNoEncontradoException {
+            @PathVariable long id) {
         UsuarioOutDTO usuarioEncontrado  = usuarioService.buscarUsuarioPorId(id);
         return ResponseEntity.ok(usuarioEncontrado );
     }
@@ -60,8 +59,7 @@ public class UsuarioController {
     @GetMapping("/{id}/admin")
     @PreAuthorize("hasAnyRole('ADMIN','MODS')")
     public ResponseEntity<UsuarioAdminOutDTO> obtenerUsuarioAdmin(
-            @PathVariable long id)
-            throws UsuarioNoEncontradoException {
+            @PathVariable long id) {
         UsuarioAdminOutDTO dto = usuarioService.buscarUsuarioPorIdAdmin(id);
         return ResponseEntity.ok(dto);
     }
@@ -70,11 +68,10 @@ public class UsuarioController {
     public ResponseEntity<UsuarioOutDTO> modificarUsuario(
             @PathVariable long id,
             @Valid @ModelAttribute UsuarioPutDTO usuarioPutDTO,
-            Authentication authentication) throws UsuarioNoEncontradoException {
-
-            String emailUsuario = SecurityUtils.email(authentication);
-            boolean esAdmin = SecurityUtils.isAdmin(authentication);
-            boolean esMods = SecurityUtils.isMods(authentication);
+            Authentication authentication) {
+        String emailUsuario = SecurityUtils.email(authentication);
+        boolean esAdmin = SecurityUtils.isAdmin(authentication);
+        boolean esMods = SecurityUtils.isMods(authentication);
 
         UsuarioOutDTO usuarioActual = usuarioService.buscarUsuarioPorId(id);
 
@@ -93,9 +90,7 @@ public class UsuarioController {
     public ResponseEntity<UsuarioOutDTO> actualizarContrasena(
             @PathVariable long id,
             @Valid @RequestBody UsuarioPasswordDTO passwordDTO,
-            Authentication authentication)
-            throws UsuarioNoEncontradoException {
-
+            Authentication authentication) {
         String emailUsuario = SecurityUtils.email(authentication);
         boolean esAdmin = SecurityUtils.isAdmin(authentication);
         boolean esMods = SecurityUtils.isMods(authentication);
@@ -108,9 +103,7 @@ public class UsuarioController {
     public ResponseEntity<UsuarioOutDTO> actualizarRol(
             @PathVariable long id,
             @Valid @RequestBody UsuarioRolDTO dto,
-            Authentication authentication
-    ) throws UsuarioNoEncontradoException {
-
+            Authentication authentication) {
         String emailUsuario = SecurityUtils.email(authentication);
 
         UsuarioOutDTO actualizado = usuarioService.actualizarRol(id, dto.getRol(), emailUsuario);
@@ -120,9 +113,7 @@ public class UsuarioController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> borrarUsuario(
             @PathVariable long id,
-            Authentication authentication)
-            throws UsuarioNoEncontradoException {
-
+            Authentication authentication) {
         String emailUsuario = SecurityUtils.email(authentication);
         boolean esAdmin = SecurityUtils.isAdmin(authentication);
         boolean esMods  = SecurityUtils.isMods(authentication);
