@@ -18,7 +18,7 @@ public class UsuarioInDTO {
     private String email;
 
     @NotBlank(message = "La contraseña no puede estar en blanco")
-    @Size(min = 4, max = 255, message = "La contraseña debe tener entre 4 y 255 caracteres")
+    @Size(min = 6, max = 30, message = "La contraseña debe tener entre 6 y 30 caracteres")
     private String contrasena;
 
     @Size(max = 500, message = "La URL del avatar no puede superar los 500 caracteres")

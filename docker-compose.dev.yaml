@@ -1,0 +1,18 @@
+name: fancollector-dev
+
+services:
+  db:
+    image: mariadb:11.3.2
+    container_name: fancollector-db-dev
+    environment:
+      MYSQL_USER: ${MARIADB_USER}
+      MYSQL_PASSWORD: ${MARIADB_PASSWORD}
+      MYSQL_DATABASE: ${MARIADB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mariadb_data_dev:/var/lib/mysql
+
+volumes:
+  mariadb_data_dev:
