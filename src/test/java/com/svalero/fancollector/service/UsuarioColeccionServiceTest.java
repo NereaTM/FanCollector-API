@@ -381,8 +381,33 @@ public class UsuarioColeccionServiceTest {
         verify(usuarioColeccionRepository, never()).save(any(UsuarioColeccion.class));
     }
 
+    // V1 - ELIMINAR
     @Test
-    public void eliminar_existente_eliminaRelacionYSusItems() {
+    public void eliminar_existente_soloEliminaRelacion() {
+        when(usuarioColeccionRepository.findById(1L)).thenReturn(Optional.of(new UsuarioColeccion()));
+
+        usuarioColeccionService.eliminar(1L);
+
+        verify(usuarioColeccionRepository, times(1)).findById(1L);
+        verify(usuarioItemRepository, never()).deleteByUsuario_IdAndColeccion_Id(any(), any());
+        verify(usuarioColeccionRepository, times(1)).delete(any(UsuarioColeccion.class));
+    }
+
+    @Test
+    public void eliminar_noExiste_lanzaUsuarioColeccionNoEncontradoException() {
+        when(usuarioColeccionRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(UsuarioColeccionNoEncontradoException.class, () ->
+                usuarioColeccionService.eliminar(999L)
+        );
+
+        verify(usuarioColeccionRepository, times(1)).findById(999L);
+        verify(usuarioColeccionRepository, never()).delete(any(UsuarioColeccion.class));
+    }
+
+    // V2 - ELIMINAR
+    @Test
+    public void eliminarV2_existente_eliminaRelacionYSusItems() {
         boolean esAdmin = true;
         boolean esMods = false;
 
@@ -401,7 +426,7 @@ public class UsuarioColeccionServiceTest {
         when(usuarioColeccionRepository.findById(1L)).thenReturn(Optional.of(uc));
         when(currentUserResolver.usuarioActual(EMAIL)).thenReturn(usuario);
 
-        usuarioColeccionService.eliminar(1L, EMAIL, esAdmin, esMods);
+        usuarioColeccionService.eliminarV2(1L, EMAIL, esAdmin, esMods);
 
         verify(usuarioColeccionRepository, times(1)).findById(1L);
         verify(usuarioItemRepository, times(1))
@@ -410,14 +435,14 @@ public class UsuarioColeccionServiceTest {
     }
 
     @Test
-    public void eliminar_noExiste_lanzaUsuarioColeccionNoEncontradoException() {
+    public void eliminarV2_noExiste_lanzaUsuarioColeccionNoEncontradoException() {
         boolean esAdmin = true;
         boolean esMods = false;
 
         when(usuarioColeccionRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(UsuarioColeccionNoEncontradoException.class, () ->
-                usuarioColeccionService.eliminar(999L, EMAIL, esAdmin, esMods)
+                usuarioColeccionService.eliminarV2(999L, EMAIL, esAdmin, esMods)
         );
 
         verify(usuarioColeccionRepository, times(1)).findById(999L);
