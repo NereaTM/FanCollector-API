@@ -1,8 +1,6 @@
 package com.svalero.fancollector.service;
 
-import com.svalero.fancollector.domain.Coleccion;
-import com.svalero.fancollector.domain.Usuario;
-import com.svalero.fancollector.domain.UsuarioColeccion;
+import com.svalero.fancollector.domain.*;
 import com.svalero.fancollector.dto.UsuarioColeccionInDTO;
 import com.svalero.fancollector.dto.UsuarioColeccionOutDTO;
 import com.svalero.fancollector.dto.UsuarioColeccionPutDTO;
@@ -157,6 +155,84 @@ public class UsuarioColeccionServiceTest {
         );
 
         verify(usuarioColeccionRepository, never()).save(any(UsuarioColeccion.class));
+    }
+
+    // crear v2
+    @Test
+    public void crearV2_datosValidos_creaRelacionYCopiaSusItems() {
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setId(1L);
+        usuarioActual.setEmail(EMAIL);
+
+        Usuario usuario = new Usuario();
+        usuario.setId(1L);
+
+        Item item1 = new Item();
+        item1.setId(1L);
+
+        Item item2 = new Item();
+        item2.setId(2L);
+
+        Coleccion coleccion = new Coleccion();
+        coleccion.setId(1L);
+        coleccion.setEsPublica(true);
+        coleccion.setUsableComoPlantilla(true);
+        coleccion.setItems(List.of(item1, item2));
+
+        UsuarioColeccionInDTO dto = new UsuarioColeccionInDTO();
+        dto.setIdUsuario(1L);
+        dto.setIdColeccion(1L);
+
+        UsuarioColeccion ucMapeado = new UsuarioColeccion();
+        UsuarioColeccion ucGuardado = new UsuarioColeccion();
+        ucGuardado.setId(1L);
+        ucGuardado.setUsuario(usuario);
+        ucGuardado.setColeccion(coleccion);
+
+        UsuarioColeccionOutDTO outDTO = new UsuarioColeccionOutDTO();
+        outDTO.setId(1L);
+
+        when(currentUserResolver.usuarioActual(EMAIL)).thenReturn(usuarioActual);
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(coleccionRepository.findById(1L)).thenReturn(Optional.of(coleccion));
+        when(usuarioColeccionRepository.existsByUsuario_IdAndColeccion_Id(1L, 1L)).thenReturn(false);
+        when(modelMapper.map(dto, UsuarioColeccion.class)).thenReturn(ucMapeado);
+        when(usuarioColeccionRepository.save(any(UsuarioColeccion.class))).thenReturn(ucGuardado);
+        when(modelMapper.map(ucGuardado, UsuarioColeccionOutDTO.class)).thenReturn(outDTO);
+        when(usuarioItemRepository.existsByUsuarioIdAndColeccionIdAndItemId(anyLong(), anyLong(), anyLong())).thenReturn(false);
+
+        UsuarioColeccionOutDTO resultado = usuarioColeccionService.crearV2(dto, EMAIL, false, false);
+
+        assertEquals(1L, resultado.getId());
+        verify(usuarioColeccionRepository, times(1)).save(any(UsuarioColeccion.class));
+        verify(usuarioItemRepository, times(2)).save(any(UsuarioItem.class));
+    }
+
+    @Test
+    public void crearV2_relacionDuplicada_lanzaRelacionYaExisteException() {
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setId(1L);
+
+        Coleccion coleccion = new Coleccion();
+        coleccion.setId(1L);
+        coleccion.setEsPublica(true);
+        coleccion.setUsableComoPlantilla(true);
+
+        UsuarioColeccionInDTO dto = new UsuarioColeccionInDTO();
+        dto.setIdUsuario(1L);
+        dto.setIdColeccion(1L);
+
+        when(currentUserResolver.usuarioActual(EMAIL)).thenReturn(usuarioActual);
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(new Usuario()));
+        when(coleccionRepository.findById(1L)).thenReturn(Optional.of(coleccion));
+        when(usuarioColeccionRepository.existsByUsuario_IdAndColeccion_Id(1L, 1L)).thenReturn(true);
+
+        assertThrows(RelacionYaExisteException.class, () ->
+                usuarioColeccionService.crearV2(dto, EMAIL, false, false)
+        );
+
+        verify(usuarioColeccionRepository, never()).save(any(UsuarioColeccion.class));
+        verify(usuarioItemRepository, never()).save(any(UsuarioItem.class));
     }
 
     @Test

@@ -12,6 +12,8 @@ public interface UsuarioColeccionService {
 
     UsuarioColeccionOutDTO crear(UsuarioColeccionInDTO dto, String emailUsuario, boolean esAdmin, boolean esMods);
 
+    UsuarioColeccionOutDTO crearV2(UsuarioColeccionInDTO dto, String emailUsuario, boolean esAdmin, boolean esMods);
+
     UsuarioColeccionOutDTO buscarPorId(Long id, String emailUsuario, boolean esAdmin, boolean esMods);
 
     List<UsuarioColeccionOutDTO> listar(Long idUsuario, Long idColeccion, Boolean soloFavoritas, Boolean esVisible, String emailUsuario, boolean esAdmin, boolean esMods);

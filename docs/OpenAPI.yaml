@@ -2416,12 +2416,119 @@ paths:
                 message: Error interno del servidor
                 errors: { }
   # USUARIO-COLECCION
+
+  /usuario-colecciones/v2:
+    post:
+      tags:
+        - Usuario-Colecciones
+      summary: Crear relacion usuario-coleccion (v2)
+      description: Asocia un usuario con una coleccion y ademas copia automaticamente todos los items de la plantilla como UsuarioItems del usuario en estado BUSCO y 0.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsuarioColeccionInDTO'
+            examples:
+              relacionBasica:
+                summary: Relacion basica
+                value:
+                  idUsuario: 1
+                  idColeccion: 2
+                  esFavorita: true
+                  esCreador: false
+              relacionCreador:
+                summary: Usuario es creador
+                value:
+                  idUsuario: 2
+                  idColeccion: 3
+                  esFavorita: true
+                  esCreador: true
+      responses:
+        '201':
+          description: Relacion creada con items de plantilla copiados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioColeccionOutDTO'
+              examples:
+                relacionCreada:
+                  summary: Relacion recien creada
+                  value:
+                    id: 3
+                    idUsuario: 1
+                    idColeccion: 2
+                    esFavorita: true
+                    esCreador: false
+                    fechaAgregada: "2025-12-13T17:30:00"
+        '400':
+          description: Datos invalidos o relacion ya existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              examples:
+                validacionError:
+                  summary: Errores de validacion
+                  value:
+                    statusCode: 400
+                    message: Errores de validacion
+                    errors:
+                      idUsuario: El ID del usuario es obligatorio
+                      idColeccion: El ID de la coleccion es obligatorio
+                relacionDuplicada:
+                  summary: Relacion ya existe
+                  value:
+                    statusCode: 400
+                    message: La relacion ya existe
+                    errors: { }
+        '404':
+          description: Usuario o coleccion no encontrados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              examples:
+                usuarioNoEncontrado:
+                  summary: Usuario no existe
+                  value:
+                    statusCode: 404
+                    message: Usuario con id 999 no encontrado
+                    errors: { }
+                coleccionNoEncontrada:
+                  summary: Coleccion no existe
+                  value:
+                    statusCode: 404
+                    message: Coleccion con id 999 no encontrada
+                    errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta accion
+                errors: { }
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 500
+                message: Error interno del servidor
+                errors: { }
+
   /usuario-colecciones:
     post:
       tags:
         - Usuario-Colecciones
       summary: Crear relacion usuario-coleccion
-      description: Asocia un usuario con una coleccion
+      deprecated: true
+      description: Asocia un usuario con una coleccion. Deprecado, usar POST /usuario-colecciones/v2.
       requestBody:
         required: true
         content:
