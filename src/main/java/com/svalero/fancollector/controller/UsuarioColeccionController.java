@@ -37,6 +37,17 @@ public class UsuarioColeccionController {
         return new ResponseEntity<>(usuarioColeccionService.crear(dto, email, esAdmin, esMods),HttpStatus.CREATED);
     }
 
+    @PostMapping("/v2")
+    public ResponseEntity<UsuarioColeccionOutDTO> crearV2(
+            @Valid @RequestBody UsuarioColeccionInDTO dto,
+            Authentication authentication) {
+        String email = SecurityUtils.email(authentication);
+        boolean esAdmin = SecurityUtils.isAdmin(authentication);
+        boolean esMods = SecurityUtils.isMods(authentication);
+
+        return new ResponseEntity<>(usuarioColeccionService.crearV2(dto, email, esAdmin, esMods), HttpStatus.CREATED);
+    }
+
     @GetMapping
     public ResponseEntity<List<UsuarioColeccionOutDTO>> listar(
             @RequestParam(required = false) Long idUsuario,

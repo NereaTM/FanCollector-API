@@ -188,6 +188,61 @@ public class UsuarioColeccionControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    // crear v2
+    @Test
+    public void crearUsuarioColeccionV2_datosValidos_devuelve201() throws Exception {
+        UsuarioColeccionInDTO inDTO = new UsuarioColeccionInDTO();
+        inDTO.setIdUsuario(1L);
+        inDTO.setIdColeccion(1L);
+        inDTO.setEsFavorita(true);
+
+        UsuarioColeccionOutDTO outDTO = new UsuarioColeccionOutDTO();
+        outDTO.setId(1L);
+        outDTO.setIdUsuario(1L);
+        outDTO.setIdColeccion(1L);
+        outDTO.setEsFavorita(true);
+
+        when(usuarioColeccionService.crearV2(any(UsuarioColeccionInDTO.class), anyString(), anyBoolean(), anyBoolean()))
+                .thenReturn(outDTO);
+
+        mockMvc.perform(post("/usuario-colecciones/v2")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(inDTO))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.esFavorita").value(true));
+    }
+
+    @Test
+    public void crearUsuarioColeccionV2_relacionDuplicada_devuelve400() throws Exception {
+        when(usuarioColeccionService.crearV2(any(UsuarioColeccionInDTO.class), anyString(), anyBoolean(), anyBoolean()))
+                .thenThrow(new RelacionYaExisteException("La relacion ya existe"));
+
+        mockMvc.perform(post("/usuario-colecciones/v2")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UsuarioColeccionInDTO())))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void crearUsuarioColeccionV2_usuarioNoExiste_devuelve404() throws Exception {
+        UsuarioColeccionInDTO inDTO = new UsuarioColeccionInDTO();
+        inDTO.setIdUsuario(999L);
+        inDTO.setIdColeccion(1L);
+
+        when(usuarioColeccionService.crearV2(any(UsuarioColeccionInDTO.class), anyString(), anyBoolean(), anyBoolean()))
+                .thenThrow(new UsuarioNoEncontradoException(999L));
+
+        mockMvc.perform(post("/usuario-colecciones/v2")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(inDTO)))
+                .andExpect(status().isNotFound());
+    }
+
     @Test
     public void modificarUsuarioColeccion_existente_devuelve200() throws Exception {
         UsuarioColeccionPutDTO putDTO = new UsuarioColeccionPutDTO();
@@ -342,7 +397,7 @@ public class UsuarioColeccionControllerTest {
     //v2 eliminar
     @Test
     public void eliminarUsuarioColeccionV2_existente_devuelve204() throws Exception {
-        mockMvc.perform(delete("/usuario-colecciones/1")
+        mockMvc.perform(delete("/usuario-colecciones/v2/1")
                         .with(csrf()))
                 .andExpect(status().isNoContent());
     }
@@ -352,7 +407,7 @@ public class UsuarioColeccionControllerTest {
         doThrow(new UsuarioColeccionNoEncontradoException(1L))
                 .when(usuarioColeccionService).eliminarV2(eq(1L),anyString(),anyBoolean(),anyBoolean());
 
-        mockMvc.perform(delete("/usuario-colecciones/1")
+        mockMvc.perform(delete("/usuario-colecciones/v2/1")
                         .with(csrf()))
                 .andExpect(status().isNotFound());
     }
