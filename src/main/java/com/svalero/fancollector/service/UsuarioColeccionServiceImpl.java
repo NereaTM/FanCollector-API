@@ -167,9 +167,19 @@ public class UsuarioColeccionServiceImpl implements UsuarioColeccionService {
         return modelMapper.map(usuarioColeccionRepository.save(uc),UsuarioColeccionOutDTO.class);
     }
 
+    @Override
+    public void eliminar(Long id)
+            throws UsuarioColeccionNoEncontradoException {
+
+        UsuarioColeccion uc = usuarioColeccionRepository.findById(id)
+                .orElseThrow(() -> new UsuarioColeccionNoEncontradoException(id));
+
+        usuarioColeccionRepository.delete(uc);
+    }
+
     @Transactional
     @Override
-    public void eliminar(Long id, String emailUsuario, boolean esAdmin, boolean esMods) {
+    public void eliminarV2(Long id, String emailUsuario, boolean esAdmin, boolean esMods) {
         UsuarioColeccion uc = usuarioColeccionRepository.findById(id)
                 .orElseThrow(() -> new UsuarioColeccionNoEncontradoException(id));
         Usuario usuarioActual = currentUserResolver.usuarioActual(emailUsuario);

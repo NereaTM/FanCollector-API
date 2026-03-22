@@ -321,6 +321,7 @@ public class UsuarioColeccionControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    // v1 eliminar
     @Test
     public void eliminarUsuarioColeccion_existente_devuelve204() throws Exception {
         mockMvc.perform(delete("/usuario-colecciones/1")
@@ -331,7 +332,25 @@ public class UsuarioColeccionControllerTest {
     @Test
     public void eliminarUsuarioColeccion_noExiste_devuelve404() throws Exception {
         doThrow(new UsuarioColeccionNoEncontradoException(1L))
-                .when(usuarioColeccionService).eliminar(eq(1L),anyString(),anyBoolean(),anyBoolean());
+                .when(usuarioColeccionService).eliminar(eq(1L));
+
+        mockMvc.perform(delete("/usuario-colecciones/1")
+                        .with(csrf()))
+                .andExpect(status().isNotFound());
+    }
+
+    //v2 eliminar
+    @Test
+    public void eliminarUsuarioColeccionV2_existente_devuelve204() throws Exception {
+        mockMvc.perform(delete("/usuario-colecciones/1")
+                        .with(csrf()))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void eliminarUsuarioColeccionV2_noExiste_devuelve404() throws Exception {
+        doThrow(new UsuarioColeccionNoEncontradoException(1L))
+                .when(usuarioColeccionService).eliminarV2(eq(1L),anyString(),anyBoolean(),anyBoolean());
 
         mockMvc.perform(delete("/usuario-colecciones/1")
                         .with(csrf()))

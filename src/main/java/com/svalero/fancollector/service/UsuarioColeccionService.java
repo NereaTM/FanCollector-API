@@ -18,7 +18,9 @@ public interface UsuarioColeccionService {
 
     UsuarioColeccionOutDTO actualizar(Long id, UsuarioColeccionPutDTO dto, String emailUsuario, boolean esAdmin, boolean esMods);
 
-    void eliminar(Long id, String emailUsuario, boolean esAdmin, boolean esMods);
+    void eliminar(Long id);
+
+    void eliminarV2(Long id, String emailUsuario, boolean esAdmin, boolean esMods);
 
     UsuarioColeccionOutDTO actualizarFavorita(Long id, UsuarioColeccionFavoritaDTO dto, String emailUsuario, boolean esAdmin, boolean esMods);
 

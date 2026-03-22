@@ -2763,8 +2763,9 @@ paths:
     delete:
       tags:
         - Usuario-Colecciones
-      summary: Eliminar relacion usuario-coleccion
-      description: Elimina una relacion entre usuario y coleccion
+      summary: Eliminar relacion usuario-coleccion (1)
+      deprecated: true
+      description: U sar DELETE /usuario-colecciones/v2/{id}. Elimina una relacion entre usuario y coleccion pero los items en relacion con la coleccion no se eliminan
       parameters:
         - name: id
           in: path
@@ -2777,6 +2778,54 @@ paths:
       responses:
         '204':
           description: Relacion eliminada exitosamente
+        '404':
+          description: Relacion no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 404
+                message:Usuario-coleccion con ID: 999 no encontrado
+                errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 500
+                message: Error interno del servidor
+                errors: { }
+  /usuario-colecciones/v2/{id}:
+    delete:
+      tags:
+        - Usuario-Colecciones
+      summary: Eliminar relacion usuario-coleccion e items
+      description: Elimina una relacion entre usuario y coleccion y tambien limpia los items de la relacion
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la relacion
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '204':
+          description: Relacion e items eliminada exitosamente
         '404':
           description: Relacion no encontrada
           content:

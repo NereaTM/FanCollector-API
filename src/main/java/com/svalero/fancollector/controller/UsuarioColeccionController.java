@@ -5,6 +5,7 @@ import com.svalero.fancollector.dto.UsuarioColeccionOutDTO;
 import com.svalero.fancollector.dto.UsuarioColeccionPutDTO;
 import com.svalero.fancollector.dto.patches.UsuarioColeccionFavoritaDTO;
 import com.svalero.fancollector.dto.patches.UsuarioColeccionVisibleDTO;
+import com.svalero.fancollector.exception.domain.UsuarioColeccionNoEncontradoException;
 import com.svalero.fancollector.security.auth.SecurityUtils;
 import com.svalero.fancollector.service.UsuarioColeccionService;
 import jakarta.validation.Valid;
@@ -98,14 +99,22 @@ public class UsuarioColeccionController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(
+    public ResponseEntity<Void> eliminar(@PathVariable Long id)
+            throws UsuarioColeccionNoEncontradoException {
+
+        usuarioColeccionService.eliminar(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("v2/{id}")
+    public ResponseEntity<Void> eliminarV2(
             @PathVariable Long id,
             Authentication authentication) {
         String email = SecurityUtils.email(authentication);
         boolean esAdmin = SecurityUtils.isAdmin(authentication);
         boolean esMods = SecurityUtils.isMods(authentication);
 
-        usuarioColeccionService.eliminar(id, email, esAdmin, esMods);
+        usuarioColeccionService.eliminarV2(id, email, esAdmin, esMods);
         return ResponseEntity.noContent().build();
     }
 }
