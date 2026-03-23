@@ -341,4 +341,53 @@ public class UsuarioItemControllerTest {
                         .with(csrf()))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    public void buscarPorUsuarioYColeccionV2_existente_devuelve200() throws Exception {
+        com.svalero.fancollector.dto.UsuarioItemDetalleDTO dto =
+                new com.svalero.fancollector.dto.UsuarioItemDetalleDTO();
+        dto.setId(1L);
+        dto.setIdUsuario(1L);
+        dto.setNombreUsuario("Nerea");
+        dto.setIdItem(1L);
+        dto.setNombreItem("Darkrai");
+        dto.setEstado(EstadoItem.TENGO);
+        dto.setCantidad(2);
+        dto.setEsVisible(true);
+        dto.setDescripcionItem("Figura legendaria");
+        dto.setTipo("Figura");
+
+        when(usuarioItemService.buscarPorUsuarioYColeccion(eq(1L), eq(1L), anyString(), anyBoolean(), anyBoolean()))
+                .thenReturn(List.of(dto));
+
+        mockMvc.perform(get("/usuario-items/v2")
+                        .param("idUsuario", "1")
+                        .param("idColeccion", "1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[0].estado").value("TENGO"))
+                .andExpect(jsonPath("$[0].descripcionItem").value("Figura legendaria"))
+                .andExpect(jsonPath("$[0].tipo").value("Figura"));
+    }
+
+    @Test
+    public void buscarPorUsuarioYColeccionV2_sinResultados_devuelve200ListaVacia() throws Exception {
+        when(usuarioItemService.buscarPorUsuarioYColeccion(eq(1L), eq(99L), anyString(), anyBoolean(), anyBoolean()))
+                .thenReturn(List.of());
+
+        mockMvc.perform(get("/usuario-items/v2")
+                        .param("idUsuario", "1")
+                        .param("idColeccion", "99")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    public void buscarPorUsuarioYColeccionV2_sinParametros_devuelve500() throws Exception {
+        mockMvc.perform(get("/usuario-items/v2")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError());
+    }
 }

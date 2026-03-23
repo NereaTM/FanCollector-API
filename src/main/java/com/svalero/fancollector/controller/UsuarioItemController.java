@@ -1,6 +1,7 @@
 package com.svalero.fancollector.controller;
 
 import com.svalero.fancollector.domain.enums.EstadoItem;
+import com.svalero.fancollector.dto.UsuarioItemDetalleDTO;
 import com.svalero.fancollector.dto.UsuarioItemInDTO;
 import com.svalero.fancollector.dto.UsuarioItemOutDTO;
 import com.svalero.fancollector.dto.UsuarioItemPutDTO;
@@ -49,6 +50,19 @@ public class UsuarioItemController {
         boolean esMods = SecurityUtils.isMods(authentication);
 
         return ResponseEntity.ok(usuarioItemService.listar(idUsuario, idItem, idColeccion, estado, esVisible, email, esAdmin, esMods));
+    }
+
+    @GetMapping("/v2")
+    public ResponseEntity<List<UsuarioItemDetalleDTO>> buscarPorUsuarioYColeccion(
+            @RequestParam Long idUsuario,
+            @RequestParam Long idColeccion,
+            Authentication authentication) {
+        String email = SecurityUtils.email(authentication);
+        boolean esAdmin = SecurityUtils.isAdmin(authentication);
+        boolean esMods = SecurityUtils.isMods(authentication);
+
+        return ResponseEntity.ok(usuarioItemService.buscarPorUsuarioYColeccion(
+                idUsuario, idColeccion, email, esAdmin, esMods));
     }
 
     @GetMapping("/{id}")
