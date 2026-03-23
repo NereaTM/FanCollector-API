@@ -39,7 +39,7 @@ public class ImagenUtil {
         if (nombre == null || !nombre.contains(".")) return false;
 
         String extension = nombre.substring(nombre.lastIndexOf(".") + 1).toLowerCase();
-        return !EXTENSIONES_PERMITIDAS.contains(extension);
+        return EXTENSIONES_PERMITIDAS.contains(extension);
 
     }
 
