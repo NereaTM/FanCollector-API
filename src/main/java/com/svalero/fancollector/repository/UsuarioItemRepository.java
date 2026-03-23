@@ -8,13 +8,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UsuarioItemRepository extends JpaRepository<UsuarioItem, Long> {
 
-    boolean existsByUsuarioIdAndColeccionIdAndItemId(
-            Long usuarioId, Long coleccionId, Long itemId
-    );
+    boolean existsByUsuarioIdAndColeccionIdAndItemId(Long usuarioId, Long coleccionId, Long itemId);
+    void deleteByUsuario_IdAndColeccion_Id(Long usuarioId, Long coleccionId);
 
     @Query("""
         SELECT ui FROM UsuarioItem ui
@@ -32,5 +32,4 @@ public interface UsuarioItemRepository extends JpaRepository<UsuarioItem, Long> 
             @Param("esVisible") Boolean esVisible
     );
 
-    void deleteByUsuario_IdAndColeccion_Id(Long usuarioId, Long coleccionId);
 }

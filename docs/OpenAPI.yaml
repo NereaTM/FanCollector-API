@@ -642,6 +642,51 @@ components:
           format: date-time
           example: "2025-12-06T09:15:00"
 
+    UsuarioItemDetalleDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        idUsuario:
+          type: integer
+          format: int64
+        nombreUsuario:
+          type: string
+        idColeccion:
+          type: integer
+          format: int64
+        nombreColeccion:
+          type: string
+        idItem:
+          type: integer
+          format: int64
+        nombreItem:
+          type: string
+        estado:
+          type: string
+          enum: [ BUSCO, TENGO, DROPEO, EN_CAMINO ]
+        cantidad:
+          type: integer
+        notas:
+          type: string
+        esVisible:
+          type: boolean
+        fechaRegistro:
+          type: string
+          format: date-time
+        descripcionItem:
+          type: string
+        imagenUrl:
+          type: string
+        tipo:
+          type: string
+        rareza:
+          type: string
+          enum: [ COMUN, RARO, EPICO, LEGENDARIO ]
+        anioLanzamiento:
+          type: integer
+
     # ERROR
     ErrorRespuesta:
       type: object
@@ -3615,6 +3660,134 @@ paths:
                 statusCode: 403
                 message: No tienes permisos para realizar esta acción
                 errors: { }
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 500
+                message: Error interno del servidor
+                errors: { }
+
+  /usuario-items/v2:
+    get:
+      tags:
+        - Usuario-Items
+      summary: Listar items del usuario en una coleccion con detalle completo (v2)
+      description: Devuelve los UsuarioItems de un usuario en una coleccion incluyendo los datos completos del item (rareza, tipo, descripcion, imagen). Combina de GET /items?idColeccion y GET /usuario-items en una sola llamada.
+      parameters:
+        - name: idUsuario
+          in: query
+          required: true
+          description: ID del usuario
+          schema:
+            type: integer
+            format: int64
+          example: 1
+        - name: idColeccion
+          in: query
+          required: true
+          description: ID de la coleccion
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: Lista de items del usuario con detalle completo
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UsuarioItemDetalleDTO'
+              examples:
+                itemsTengo:
+                  summary: Usuario con items en estado TENGO
+                  value:
+                    - id: 1
+                      idUsuario: 1
+                      nombreUsuario: Nerea Test
+                      idColeccion: 1
+                      nombreColeccion: BTS Love Yourself Collection
+                      idItem: 5
+                      nombreItem: RM - Map of the Soul 7 Photocard
+                      estado: TENGO
+                      cantidad: 2
+                      notas: En perfecto estado
+                      esVisible: true
+                      fechaRegistro: "2025-12-06T09:15:00"
+                      descripcionItem: Photocard oficial edicion especial
+                      imagenUrl: /uploads/rm-photocard.jpg
+                      tipo: Photocard
+                      rareza: RARO
+                      anioLanzamiento: 2020
+                itemsBusco:
+                  summary: Usuario con items en estado BUSCO
+                  value:
+                    - id: 2
+                      idUsuario: 1
+                      nombreUsuario: Nerea Test
+                      idColeccion: 2
+                      nombreColeccion: Pokemon Primera Generacion
+                      idItem: 10
+                      nombreItem: Blastoise Holo
+                      estado: BUSCO
+                      cantidad: 0
+                      notas: null
+                      esVisible: true
+                      fechaRegistro: "2025-12-10T11:00:00"
+                      descripcionItem: Carta holografica primera edicion
+                      imagenUrl: /uploads/blastoise.jpg
+                      tipo: Carta
+                      rareza: LEGENDARIO
+                      anioLanzamiento: 1999
+        '400':
+          description: Datos invalidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              examples:
+                parametroAusente:
+                  summary: Parametro obligatorio ausente
+                  value:
+                    statusCode: 400
+                    message: Errores de validacion
+                    errors:
+                      idUsuario: El ID del usuario es obligatorio
+                      idColeccion: El ID de la coleccion es obligatorio
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta accion
+                errors: { }
+        '404':
+          description: Usuario o coleccion no encontrados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              examples:
+                usuarioNoEncontrado:
+                  summary: Usuario no existe
+                  value:
+                    statusCode: 404
+                    message: Usuario con id 999 no encontrado
+                    errors: { }
+                coleccionNoEncontrada:
+                  summary: Coleccion no existe
+                  value:
+                    statusCode: 404
+                    message: Coleccion con id 999 no encontrada
+                    errors: { }
         '500':
           description: Error interno del servidor
           content:

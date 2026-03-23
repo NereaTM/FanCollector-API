@@ -5,6 +5,7 @@ import com.svalero.fancollector.domain.Item;
 import com.svalero.fancollector.domain.Usuario;
 import com.svalero.fancollector.domain.UsuarioItem;
 import com.svalero.fancollector.domain.enums.EstadoItem;
+import com.svalero.fancollector.dto.UsuarioItemDetalleDTO;
 import com.svalero.fancollector.dto.UsuarioItemInDTO;
 import com.svalero.fancollector.dto.UsuarioItemOutDTO;
 import com.svalero.fancollector.dto.UsuarioItemPutDTO;
@@ -112,6 +113,26 @@ public class UsuarioItemServiceImpl implements UsuarioItemService {
     }
 
     @Override
+    public List<UsuarioItemDetalleDTO> buscarPorUsuarioYColeccion(Long idUsuario, Long idColeccion, String emailUsuario, boolean esAdmin, boolean esMods) {
+
+        List<UsuarioItem> items = usuarioItemRepository.buscarPorFiltros(
+                idUsuario, null, idColeccion, null, null);
+
+        Usuario usuarioActual = null;
+        if (emailUsuario != null && !emailUsuario.isBlank()) {
+            usuarioActual = currentUserResolver.usuarioActual(emailUsuario);
+        }
+
+        List<UsuarioItemDetalleDTO> resultado = new ArrayList<>();
+        for (UsuarioItem ui : items) {
+            if (Permisos.puedeVerUsuarioItem(ui, usuarioActual, esAdmin, esMods)) {
+                resultado.add(toDetalleDTO(ui));
+            }
+        }
+        return resultado;
+    }
+
+    @Override
     public List<UsuarioItemOutDTO> listar(Long idUsuario, Long idItem, Long idColeccion, EstadoItem estado, Boolean esVisible,
             String emailUsuario, boolean esAdmin, boolean esMods) {
 
@@ -200,5 +221,30 @@ public class UsuarioItemServiceImpl implements UsuarioItemService {
         if (estado == EstadoItem.BUSCO) return 0;
         if (cantidad == null || cantidad < 1) return 1;
         return cantidad;
+    }
+
+    private UsuarioItemDetalleDTO toDetalleDTO(UsuarioItem ui) {
+        UsuarioItemDetalleDTO dto = new UsuarioItemDetalleDTO();
+
+        dto.setId(ui.getId());
+        dto.setIdUsuario(ui.getUsuario().getId());
+        dto.setNombreUsuario(ui.getUsuario().getNombre());
+        dto.setIdColeccion(ui.getColeccion().getId());
+        dto.setNombreColeccion(ui.getColeccion().getNombre());
+        dto.setIdItem(ui.getItem().getId());
+        dto.setNombreItem(ui.getItem().getNombre());
+        dto.setEstado(ui.getEstado());
+        dto.setCantidad(ui.getCantidad());
+        dto.setNotas(ui.getNotas());
+        dto.setEsVisible(ui.isEsVisible());
+        dto.setFechaRegistro(ui.getFechaRegistro());
+
+        dto.setDescripcionItem(ui.getItem().getDescripcion());
+        dto.setImagenUrl(ui.getItem().getImagenUrl());
+        dto.setTipo(ui.getItem().getTipo());
+        dto.setRareza(ui.getItem().getRareza());
+        dto.setAnioLanzamiento(ui.getItem().getAnioLanzamiento());
+
+        return dto;
     }
 }

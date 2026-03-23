@@ -437,4 +437,59 @@ public class UsuarioItemServiceTest {
 
         assertEquals(0, resultado.getCantidad());
     }
+
+    @Test
+    public void buscarPorUsuarioYColeccion_existente_devuelveItemsConDetalle() {
+        Usuario usuario = new Usuario();
+        usuario.setId(1L);
+        usuario.setNombre("Nerea");
+
+        Coleccion coleccion = new Coleccion();
+        coleccion.setId(1L);
+        coleccion.setNombre("Figuras Anime");
+
+        Item item = new Item();
+        item.setId(1L);
+        item.setNombre("Darkrai");
+        item.setDescripcion("Figura legendaria");
+        item.setImagenUrl("darkrai.jpg");
+        item.setTipo("Figura");
+        item.setRareza(com.svalero.fancollector.domain.enums.RarezaItem.LEGENDARIO);
+        item.setAnioLanzamiento(2023);
+
+        UsuarioItem ui = new UsuarioItem();
+        ui.setId(1L);
+        ui.setUsuario(usuario);
+        ui.setColeccion(coleccion);
+        ui.setItem(item);
+        ui.setEstado(EstadoItem.TENGO);
+        ui.setCantidad(2);
+        ui.setEsVisible(true);
+
+        when(usuarioItemRepository.buscarPorFiltros(1L, null, 1L, null, null))
+                .thenReturn(List.of(ui));
+
+        List<com.svalero.fancollector.dto.UsuarioItemDetalleDTO> resultado =
+                usuarioItemService.buscarPorUsuarioYColeccion(1L, 1L, EMAIL, true, false);
+
+        assertEquals(1, resultado.size());
+        assertEquals(1L, resultado.get(0).getId());
+        assertEquals(EstadoItem.TENGO, resultado.get(0).getEstado());
+        assertEquals("Darkrai", resultado.get(0).getNombreItem());
+        assertEquals("Figura legendaria", resultado.get(0).getDescripcionItem());
+        assertEquals(com.svalero.fancollector.domain.enums.RarezaItem.LEGENDARIO, resultado.get(0).getRareza());
+        verify(usuarioItemRepository, times(1)).buscarPorFiltros(1L, null, 1L, null, null);
+    }
+
+    @Test
+    public void buscarPorUsuarioYColeccion_sinItems_devuelveListaVacia() {
+        when(usuarioItemRepository.buscarPorFiltros(1L, null, 1L, null, null))
+                .thenReturn(List.of());
+
+        List<com.svalero.fancollector.dto.UsuarioItemDetalleDTO> resultado =
+                usuarioItemService.buscarPorUsuarioYColeccion(1L, 1L, EMAIL, true, false);
+
+        assertEquals(0, resultado.size());
+        verify(usuarioItemRepository, times(1)).buscarPorFiltros(1L, null, 1L, null, null);
+    }
 }
