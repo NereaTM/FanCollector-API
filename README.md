@@ -72,14 +72,14 @@ Antes de ejecutar el proyecto, asegúrate de tener instalado:
 3. **Crear archivo `.env`** en la raíz del proyecto.
 
 `.env.dev`:
-```env
+   ```env
    MARIADB_USER=fancollector_user
    MARIADB_PASSWORD=tu_password
    MARIADB_DATABASE=fancollector
    MARIADB_ROOT_PASSWORD=root_password
    ```
    `.env.prod`:
-```env
+   ```env
    # DB
    MARIADB_DATABASE=fancollector
    MARIADB_ROOT_PASSWORD=tu_root_password
@@ -103,27 +103,27 @@ Antes de ejecutar el proyecto, asegúrate de tener instalado:
 Levanta la BD en Docker y arranca la API desde el IDE con el perfil `dev`. En IntelliJ: Run > Edit... Configurations > Active profiles: `dev`.
 
 _No necesitas crear la base de datos manualmente, Docker Compose la crea automáticamente._
-```bash
-make dev          # levanta la BD
-make stop-dev     # para la BD
-```
+   ```bash
+   make dev          # levanta la BD
+   make stop-dev     # para la BD
+   ```
 O sin Makefile:
-```bash
-docker compose --env-file .env.dev -f docker-compose.dev.yaml up -d
-docker compose -f docker-compose.dev.yaml down
-```
+   ```bash
+   docker compose --env-file .env.dev -f docker-compose.dev.yaml up -d
+   docker compose -f docker-compose.dev.yaml down
+   ```
 
 ### Producción
 Levanta la BD y la API juntas en Docker. Requiere `.env.prod` en la raíz.
-```bash
-make prod         # levanta todo
-make stop-prod    # para todo
-```
+   ```bash
+   make prod         # levanta todo
+   make stop-prod    # para todo
+   ```
 O sin Makefile:
-```bash
-docker compose --env-file .env.prod up --build -d
-docker compose down
-```
+   ```bash
+   docker compose --env-file .env.prod up --build -d
+   docker compose down
+   ```
 
 La API estará disponible en `http://localhost:8080`
 

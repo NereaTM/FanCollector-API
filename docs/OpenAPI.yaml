@@ -9,7 +9,9 @@ info:
 
 servers:
   - url: http://localhost:8080
-    description: Servidor de desarrollo local
+    description: Entorno de desarrollo local (BD en Docker, API en IDE con perfil dev)
+  - url: http://localhost:8080
+    description: Entorno de producción (BD + API en Docker con perfil prod)
 
 tags:
   - name: Usuarios
