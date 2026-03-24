@@ -6,6 +6,11 @@ dev:
 stop-dev:
 	docker compose -f docker-compose.dev.yaml down
 
+# Levanta la BD + API en desarrollo
+dev-full:
+	docker compose --env-file .env.dev -f docker-compose.dev.yaml up -d
+	mvn spring-boot:run "-Dspring-boot.run.profiles=dev"
+
 # Levanta BD + API en producción
 prod:
 	docker compose --env-file .env.prod up --build -d
