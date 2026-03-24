@@ -390,4 +390,68 @@ public class UsuarioItemControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError());
     }
+
+    @Test
+    public void actualizarCompletoV2_estadoBusco_devuelve200ConCantidadCero() throws Exception {
+        UsuarioItemPutDTO putDTO = new UsuarioItemPutDTO();
+        putDTO.setEstado(EstadoItem.BUSCO);
+        putDTO.setEsVisible(true);
+        putDTO.setNotas("Lo sigo buscando");
+
+        UsuarioItemOutDTO outDTO = new UsuarioItemOutDTO();
+        outDTO.setId(1L);
+        outDTO.setEstado(EstadoItem.BUSCO);
+        outDTO.setCantidad(0);
+        outDTO.setEsVisible(true);
+
+        when(usuarioItemService.actualizarCompletoV2(eq(1L), any(UsuarioItemPutDTO.class), anyString(), anyBoolean(), anyBoolean()))
+                .thenReturn(outDTO);
+
+        mockMvc.perform(put("/usuario-items/v2/1")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(putDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estado").value("BUSCO"))
+                .andExpect(jsonPath("$.cantidad").value(0));
+    }
+
+    @Test
+    public void actualizarCompletoV2_estadoTengo_devuelve200ConCantidadUno() throws Exception {
+        UsuarioItemPutDTO putDTO = new UsuarioItemPutDTO();
+        putDTO.setEstado(EstadoItem.TENGO);
+        putDTO.setEsVisible(true);
+
+        UsuarioItemOutDTO outDTO = new UsuarioItemOutDTO();
+        outDTO.setId(1L);
+        outDTO.setEstado(EstadoItem.TENGO);
+        outDTO.setCantidad(1);
+        outDTO.setEsVisible(true);
+
+        when(usuarioItemService.actualizarCompletoV2(eq(1L), any(UsuarioItemPutDTO.class), anyString(), anyBoolean(), anyBoolean()))
+                .thenReturn(outDTO);
+
+        mockMvc.perform(put("/usuario-items/v2/1")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(putDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estado").value("TENGO"))
+                .andExpect(jsonPath("$.cantidad").value(1));
+    }
+
+    @Test
+    public void actualizarCompletoV2_noExiste_devuelve404() throws Exception {
+        UsuarioItemPutDTO putDTO = new UsuarioItemPutDTO();
+        putDTO.setEstado(EstadoItem.TENGO);
+
+        when(usuarioItemService.actualizarCompletoV2(eq(999L), any(UsuarioItemPutDTO.class), anyString(), anyBoolean(), anyBoolean()))
+                .thenThrow(new UsuarioItemNoEncontradoException(999L));
+
+        mockMvc.perform(put("/usuario-items/v2/999")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(putDTO)))
+                .andExpect(status().isNotFound());
+    }
 }

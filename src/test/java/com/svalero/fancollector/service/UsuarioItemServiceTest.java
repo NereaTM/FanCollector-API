@@ -492,4 +492,132 @@ public class UsuarioItemServiceTest {
         assertEquals(0, resultado.size());
         verify(usuarioItemRepository, times(1)).buscarPorFiltros(1L, null, 1L, null, null);
     }
+    @Test
+    public void actualizarCompletoV2_estadoBusco_fijaCantidadACero() {
+        boolean esAdmin = true;
+        boolean esMods = false;
+
+        UsuarioItemPutDTO dto = new UsuarioItemPutDTO();
+        dto.setEstado(EstadoItem.BUSCO);
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setId(1L);
+        usuarioActual.setEmail(EMAIL);
+
+        UsuarioItem uiExistente = new UsuarioItem();
+        uiExistente.setId(1L);
+        uiExistente.setUsuario(usuarioActual);
+        uiExistente.setEstado(EstadoItem.TENGO);
+        uiExistente.setCantidad(3);
+
+        UsuarioItem uiActualizado = new UsuarioItem();
+        uiActualizado.setId(1L);
+        uiActualizado.setEstado(EstadoItem.BUSCO);
+        uiActualizado.setCantidad(0);
+
+        UsuarioItemOutDTO outDTO = new UsuarioItemOutDTO();
+        outDTO.setId(1L);
+        outDTO.setEstado(EstadoItem.BUSCO);
+        outDTO.setCantidad(0);
+
+        when(usuarioItemRepository.findById(1L)).thenReturn(Optional.of(uiExistente));
+        when(currentUserResolver.usuarioActual(EMAIL)).thenReturn(usuarioActual);
+        when(usuarioItemRepository.save(any(UsuarioItem.class))).thenReturn(uiActualizado);
+        when(modelMapper.map(uiActualizado, UsuarioItemOutDTO.class)).thenReturn(outDTO);
+
+        UsuarioItemOutDTO resultado = usuarioItemService.actualizarCompletoV2(1L, dto, EMAIL, esAdmin, esMods);
+
+        assertEquals(EstadoItem.BUSCO, resultado.getEstado());
+        assertEquals(0, resultado.getCantidad());
+        verify(usuarioItemRepository, times(1)).save(any(UsuarioItem.class));
+    }
+
+    @Test
+    public void actualizarCompletoV2_estadoTengo_fijaCantidadAUno() {
+        boolean esAdmin = true;
+        boolean esMods = false;
+
+        UsuarioItemPutDTO dto = new UsuarioItemPutDTO();
+        dto.setEstado(EstadoItem.TENGO);
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setId(1L);
+        usuarioActual.setEmail(EMAIL);
+
+        UsuarioItem uiExistente = new UsuarioItem();
+        uiExistente.setId(1L);
+        uiExistente.setUsuario(usuarioActual);
+        uiExistente.setEstado(EstadoItem.BUSCO);
+        uiExistente.setCantidad(0);
+
+        UsuarioItem uiActualizado = new UsuarioItem();
+        uiActualizado.setId(1L);
+        uiActualizado.setEstado(EstadoItem.TENGO);
+        uiActualizado.setCantidad(1);
+
+        UsuarioItemOutDTO outDTO = new UsuarioItemOutDTO();
+        outDTO.setId(1L);
+        outDTO.setEstado(EstadoItem.TENGO);
+        outDTO.setCantidad(1);
+
+        when(usuarioItemRepository.findById(1L)).thenReturn(Optional.of(uiExistente));
+        when(currentUserResolver.usuarioActual(EMAIL)).thenReturn(usuarioActual);
+        when(usuarioItemRepository.save(any(UsuarioItem.class))).thenReturn(uiActualizado);
+        when(modelMapper.map(uiActualizado, UsuarioItemOutDTO.class)).thenReturn(outDTO);
+
+        UsuarioItemOutDTO resultado = usuarioItemService.actualizarCompletoV2(1L, dto, EMAIL, esAdmin, esMods);
+
+        assertEquals(EstadoItem.TENGO, resultado.getEstado());
+        assertEquals(1, resultado.getCantidad());
+        verify(usuarioItemRepository, times(1)).save(any(UsuarioItem.class));
+    }
+
+    @Test
+    public void actualizarCompletoV2_noExiste_lanzaUsuarioItemNoEncontradoException() {
+        boolean esAdmin = true;
+        boolean esMods = false;
+
+        UsuarioItemPutDTO dto = new UsuarioItemPutDTO();
+        dto.setEstado(EstadoItem.TENGO);
+
+        when(usuarioItemRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(UsuarioItemNoEncontradoException.class, () ->
+                usuarioItemService.actualizarCompletoV2(999L, dto, EMAIL, esAdmin, esMods)
+        );
+
+        verify(usuarioItemRepository, times(1)).findById(999L);
+        verify(usuarioItemRepository, never()).save(any(UsuarioItem.class));
+    }
+
+    @Test
+    public void actualizarCompletoV2_sinPermiso_lanzaAccesoDenegadoException() {
+        boolean esAdmin = false;
+        boolean esMods = false;
+
+        UsuarioItemPutDTO dto = new UsuarioItemPutDTO();
+        dto.setEstado(EstadoItem.TENGO);
+
+        Usuario otrousuario = new Usuario();
+        otrousuario.setId(2L);
+        otrousuario.setEmail("otro@test.com");
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setId(1L);
+        usuarioActual.setEmail(EMAIL);
+
+        UsuarioItem uiExistente = new UsuarioItem();
+        uiExistente.setId(1L);
+        uiExistente.setUsuario(otrousuario);
+
+        when(usuarioItemRepository.findById(1L)).thenReturn(Optional.of(uiExistente));
+        when(currentUserResolver.usuarioActual(EMAIL)).thenReturn(usuarioActual);
+
+        assertThrows(AccesoDenegadoException.class, () ->
+                usuarioItemService.actualizarCompletoV2(1L, dto, EMAIL, esAdmin, esMods)
+        );
+
+        verify(usuarioItemRepository, never()).save(any(UsuarioItem.class));
+    }
+
 }

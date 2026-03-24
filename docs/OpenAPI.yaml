@@ -3799,6 +3799,120 @@ paths:
                 message: Error interno del servidor
                 errors: { }
 
+  /usuario-items/v2/{id}:
+    put:
+      tags:
+        - Usuario-Items
+      summary: Actualizar relacion usuario-item con auto-ajuste de cantidad
+      description: Acttualiza y si el estado es BUSCO la cantidad se fija a 0, en cualquier otro caso se fija a 1. El campo cantidad del cuerpo se ignora
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la relacion
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsuarioItemPutDTO'
+            examples:
+              cambiarABusco:
+                summary: Cambiar a BUSCO, cantidad se pone a 0 automaticamente
+                value:
+                  estado: BUSCO
+                  esVisible: true
+                  notas: Lo sigo buscando
+              cambiarATengo:
+                summary: Cambiar a TENGO, cantidad se pone a 1 automaticamente
+                value:
+                  estado: TENGO
+                  esVisible: true
+                  notas: Conseguido en el mercadillo
+      responses:
+        '200':
+          description: Relacion actualizada con cantidad ajustada automaticamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioItemOutDTO'
+              examples:
+                resultadoBusco:
+                  summary: Estado BUSCO, cantidad ajustada a 0
+                  value:
+                    id: 1
+                    idUsuario: 1
+                    nombreUsuario: Nerea Test
+                    idColeccion: 1
+                    nombreColeccion: BTS Love Yourself Collection
+                    idItem: 5
+                    nombreItem: RM - Map of the Soul 7 Photocard
+                    estado: BUSCO
+                    cantidad: 0
+                    notas: Lo sigo buscando
+                    esVisible: true
+                    fechaRegistro: "2025-12-06T09:15:00"
+                resultadoTengo:
+                  summary: Estado TENGO, cantidad ajustada a 1
+                  value:
+                    id: 1
+                    idUsuario: 1
+                    nombreUsuario: Nerea Test
+                    idColeccion: 1
+                    nombreColeccion: BTS Love Yourself Collection
+                    idItem: 5
+                    nombreItem: RM - Map of the Soul 7 Photocard
+                    estado: TENGO
+                    cantidad: 1
+                    notas: Conseguido en el mercadillo
+                    esVisible: true
+                    fechaRegistro: "2025-12-06T09:15:00"
+        '400':
+          description: Datos invalidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 400
+                message: Errores de validacion
+                errors:
+                  cantidad: La cantidad no puede ser negativa
+        '404':
+          description: Relacion no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 404
+                message: Usuario-Item con id 999 no encontrado
+                errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta accion
+                errors: { }
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 500
+                message: Error interno del servidor
+                errors: { }
+
   /usuario-items/{id}/visible:
     patch:
       tags:
