@@ -193,6 +193,30 @@ public class UsuarioItemServiceImpl implements UsuarioItemService {
     }
 
     @Override
+    public UsuarioItemOutDTO actualizarCompletoV2(Long id, UsuarioItemPutDTO dto, String emailUsuario, boolean esAdmin, boolean esMods) {
+
+        UsuarioItem existente = usuarioItemRepository.findById(id)
+                .orElseThrow(() -> new UsuarioItemNoEncontradoException(id));
+
+        Usuario usuarioActual = currentUserResolver.usuarioActual(emailUsuario);
+        Permisos.checkPuedeEditarOBorrarUsuarioItem(existente, usuarioActual, esAdmin, esMods);
+
+        EstadoItem estadoFinal = dto.getEstado() != null ? dto.getEstado() : existente.getEstado();
+        existente.setEstado(estadoFinal);
+
+        // v2: la cantidad se ajusta automáticamente según el estado, sin que el cliente tenga que calcularla
+        existente.setCantidad(estadoFinal == EstadoItem.BUSCO ? 0 : 1);
+
+        if (dto.getNotas() != null) {
+            existente.setNotas(dto.getNotas());}
+
+        if (dto.getEsVisible() != null) {
+            existente.setEsVisible(dto.getEsVisible());}
+
+        return modelMapper.map(usuarioItemRepository.save(existente), UsuarioItemOutDTO.class);
+    }
+
+    @Override
     public UsuarioItemOutDTO actualizarVisibilidad(Long id, Boolean esVisible, String emailUsuario, boolean esAdmin, boolean esMods) {
 
         UsuarioItem usuarioItem = usuarioItemRepository.findById(id)

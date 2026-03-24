@@ -20,6 +20,8 @@ public interface UsuarioItemService {
 
     UsuarioItemOutDTO actualizarCompleto(Long id, UsuarioItemPutDTO dto, String emailUsuario, boolean esAdmin, boolean esMods);
 
+    UsuarioItemOutDTO actualizarCompletoV2(Long id, UsuarioItemPutDTO dto, String emailUsuario, boolean esAdmin, boolean esMods);
+
     UsuarioItemOutDTO actualizarVisibilidad(Long id, Boolean esVisible, String emailUsuario, boolean esAdmin, boolean esMods);
 
     void eliminar(Long id, String emailUsuario, boolean esAdmin, boolean esMods);

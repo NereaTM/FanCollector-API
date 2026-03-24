@@ -88,6 +88,18 @@ public class UsuarioItemController {
         return ResponseEntity.ok(usuarioItemService.actualizarCompleto(id, dto, email, esAdmin, esMods));
     }
 
+    @PutMapping("/v2/{id}")
+    public ResponseEntity<UsuarioItemOutDTO> actualizarCompletoV2(
+            @PathVariable Long id,
+            @Valid @RequestBody UsuarioItemPutDTO dto,
+            Authentication authentication) {
+        String email = SecurityUtils.email(authentication);
+        boolean esAdmin = SecurityUtils.isAdmin(authentication);
+        boolean esMods = SecurityUtils.isMods(authentication);
+
+        return ResponseEntity.ok(usuarioItemService.actualizarCompletoV2(id, dto, email, esAdmin, esMods));
+    }
+
     @PatchMapping("/{id}/visible")
     public ResponseEntity<UsuarioItemOutDTO> actualizarVisibilidad(
             @PathVariable Long id,
