@@ -1,0 +1,51 @@
+name: Integration tests with Newman
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  newman:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Build jar
+        run: mvn package -DskipTests
+
+      - name: Build Docker image
+        run: docker build -t fancollector-api .
+
+      - name: Start services
+        run: docker compose up -d
+        env:
+          MARIADB_DATABASE: ${{ secrets.MARIADB_DATABASE }}
+          MARIADB_ROOT_PASSWORD: ${{ secrets.MARIADB_ROOT_PASSWORD }}
+          MARIADB_USER: ${{ secrets.MARIADB_USER }}
+          MARIADB_PASSWORD: ${{ secrets.MARIADB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION }}
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+          CLOUDINARY_FOLDER: ${{ secrets.CLOUDINARY_FOLDER }}
+
+      - name: Wait for API to be ready
+        run: |
+          for i in $(seq 1 15); do
+            curl -sf http://localhost:8080/actuator/health && break
+            sleep 5
+          done
+
+      - name: Install Newman
+        run: npm install -g newman
+
+      - name: Run integration tests
+        run: newman run docs/postman/Test-Coleccion.postman_collection.json --env-var "base_url=http://localhost:8080"
