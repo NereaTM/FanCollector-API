@@ -1,0 +1,1146 @@
+{
+  "info": {
+    "_postman_id": "0d5c6519-6cda-486e-b9ae-f764d840f0ab",
+    "name": "FanCollector - colecciones",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "49388030",
+    "_collection_link": "https://go.postman.co/collection/49388030-0d5c6519-6cda-486e-b9ae-f764d840f0ab?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "colecciones",
+      "item": [
+        {
+          "name": "/auth/registro",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"status code is 201 or 400\", () => {",
+                  "    pm.expect([201, 400]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Test Usuario\",\n  \"email\": \"{{testEmail}}\",\n  \"contrasena\": \"{{testPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/registro",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "registro"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/auth/login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const jsonResponse = pm.response.json();",
+                  "",
+                  "pm.test(\"status code is 200\", () => {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"response has token\", () => {",
+                  "    pm.expect(jsonResponse).to.have.property(\"token\");",
+                  "    pm.expect(jsonResponse.token).to.be.a(\"string\").and.not.empty;",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set(\"token_active\", jsonResponse.token);",
+                  "pm.collectionVariables.set(\"creadorId\", jsonResponse.id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{testEmail}}\",\n    \"contrasena\": \"{{testPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/colecciones",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const jsonResponse = pm.response.json();",
+                  "",
+                  "pm.test(\"status code is 201\", () => {",
+                  "    pm.expect(pm.response.code).to.eql(201);",
+                  "});",
+                  "",
+                  "pm.test(\"response structure is ok\", () => {",
+                  "    pm.expect(jsonResponse).to.have.property(\"id\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"nombre\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"descripcion\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"categoria\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"idCreador\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"nombreCreador\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"esPublica\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"usableComoPlantilla\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"fechaCreacion\");",
+                  "",
+                  "    pm.expect(jsonResponse.id).to.be.a(\"number\");",
+                  "    pm.expect(jsonResponse.nombre).to.be.a(\"string\");",
+                  "    pm.expect(jsonResponse.categoria).to.be.a(\"string\");",
+                  "    pm.expect(jsonResponse.esPublica).to.be.a(\"boolean\");",
+                  "    pm.expect(jsonResponse.usableComoPlantilla).to.be.a(\"boolean\");",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set(\"coleccionId\", jsonResponse.id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "idCreador",
+                  "value": "{{creadorId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "nombre",
+                  "value": "{{nombre1}}",
+                  "type": "text"
+                },
+                {
+                  "key": "descripcion",
+                  "value": "Coleccion de prueba uno",
+                  "type": "text"
+                },
+                {
+                  "key": "categoria",
+                  "value": "{{categoria1}}",
+                  "type": "text"
+                },
+                {
+                  "key": "esPublica",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "usableComoPlantilla",
+                  "value": "false",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/colecciones",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "colecciones"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/colecciones/:id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const jsonResponse = pm.response.json();",
+                  "",
+                  "pm.test(\"status code is 200\", () => {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"response structure is ok\", () => {",
+                  "    pm.expect(jsonResponse).to.have.property(\"id\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"nombre\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"descripcion\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"categoria\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"idCreador\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"nombreCreador\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"esPublica\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"usableComoPlantilla\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"fechaCreacion\");",
+                  "});",
+                  "",
+                  "pm.test(\"data is ok\", () => {",
+                  "    pm.expect(jsonResponse.nombre).to.eql(pm.collectionVariables.get(\"nombre1\"));",
+                  "    pm.expect(jsonResponse.categoria).to.eql(pm.collectionVariables.get(\"categoria1\"));",
+                  "    pm.expect(jsonResponse.esPublica).to.eql(true);",
+                  "    pm.expect(jsonResponse.usableComoPlantilla).to.eql(false);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/colecciones/{{coleccionId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "colecciones",
+                "{{coleccionId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/colecciones/:id (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const jsonResponse = pm.response.json();",
+                  "",
+                  "pm.test(\"status code is 404\", () => {",
+                  "    pm.expect(pm.response.code).to.eql(404);",
+                  "});",
+                  "",
+                  "pm.test(\"error response structure is ok\", () => {",
+                  "    pm.expect(jsonResponse).to.have.property(\"statusCode\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"message\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"errors\");",
+                  "});",
+                  "",
+                  "pm.test(\"error values are ok\", () => {",
+                  "    pm.expect(jsonResponse.statusCode).to.eql(404);",
+                  "    pm.expect(jsonResponse.message).to.include(\"999999\");",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/colecciones/999999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "colecciones",
+                "999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/colecciones",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const jsonResponse = pm.response.json();",
+                  "",
+                  "pm.test(\"status code is 201\", () => {",
+                  "    pm.expect(pm.response.code).to.eql(201);",
+                  "});",
+                  "",
+                  "pm.test(\"response structure is ok\", () => {",
+                  "    pm.expect(jsonResponse).to.have.property(\"id\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"nombre\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"categoria\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"esPublica\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"usableComoPlantilla\");",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set(\"coleccionId2\", jsonResponse.id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "idCreador",
+                  "value": "{{creadorId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "nombre",
+                  "value": "{{nombre2}}",
+                  "type": "text"
+                },
+                {
+                  "key": "descripcion",
+                  "value": "Coleccion de prueba dos",
+                  "type": "text"
+                },
+                {
+                  "key": "categoria",
+                  "value": "{{categoria2}}",
+                  "type": "text"
+                },
+                {
+                  "key": "esPublica",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "usableComoPlantilla",
+                  "value": "true",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/colecciones",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "colecciones"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/colecciones (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const jsonResponse = pm.response.json();",
+                  "",
+                  "pm.test(\"status code is 400\", () => {",
+                  "    pm.expect(pm.response.code).to.eql(400);",
+                  "});",
+                  "",
+                  "pm.test(\"error response structure is ok\", () => {",
+                  "    pm.expect(jsonResponse).to.have.property(\"statusCode\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"message\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"errors\");",
+                  "});",
+                  "",
+                  "pm.test(\"error values are ok\", () => {",
+                  "    pm.expect(jsonResponse.statusCode).to.eql(400);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "idCreador",
+                  "value": "{{creadorId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "categoria",
+                  "value": "{{categoria1}}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/colecciones",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "colecciones"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/colecciones",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const jsonResponse = pm.response.json();",
+                  "",
+                  "pm.test(\"status code is 200\", () => {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"response has two items\", () => {",
+                  "    pm.expect(jsonResponse).to.have.lengthOf(2);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/colecciones?categoria=TEST_COLECCIONES",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "colecciones"
+              ],
+              "query": [
+                {
+                  "key": "categoria",
+                  "value": "TEST_COLECCIONES"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/colecciones/:id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const jsonResponse = pm.response.json();",
+                  "",
+                  "pm.test(\"status code is 200\", () => {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"response structure is ok\", () => {",
+                  "    pm.expect(jsonResponse).to.have.property(\"id\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"nombre\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"categoria\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"esPublica\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"usableComoPlantilla\");",
+                  "});",
+                  "",
+                  "pm.test(\"nombre has changed\", () => {",
+                  "    pm.expect(jsonResponse.nombre).to.eql(pm.collectionVariables.get(\"nombreCambiado\"));",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "nombre",
+                  "value": "{{nombreCambiado}}",
+                  "type": "text"
+                },
+                {
+                  "key": "descripcion",
+                  "value": "Descripcion actualizada",
+                  "type": "text"
+                },
+                {
+                  "key": "categoria",
+                  "value": "{{categoria1}}",
+                  "type": "text"
+                },
+                {
+                  "key": "esPublica",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "usableComoPlantilla",
+                  "value": "false",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/colecciones/{{coleccionId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "colecciones",
+                "{{coleccionId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/colecciones/:id/publico",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const jsonResponse = pm.response.json();",
+                  "",
+                  "pm.test(\"status code is 200\", () => {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"response structure is ok\", () => {",
+                  "    pm.expect(jsonResponse).to.have.property(\"id\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"esPublica\");",
+                  "});",
+                  "",
+                  "pm.test(\"esPublica has changed\", () => {",
+                  "    pm.expect(jsonResponse.esPublica).to.eql(false);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"esPublica\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/colecciones/{{coleccionId}}/publico",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "colecciones",
+                "{{coleccionId}}",
+                "publico"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/colecciones/:id/plantilla",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const jsonResponse = pm.response.json();",
+                  "",
+                  "pm.test(\"status code is 200\", () => {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"response structure is ok\", () => {",
+                  "    pm.expect(jsonResponse).to.have.property(\"id\");",
+                  "    pm.expect(jsonResponse).to.have.property(\"usableComoPlantilla\");",
+                  "});",
+                  "",
+                  "pm.test(\"usableComoPlantilla has changed\", () => {",
+                  "    pm.expect(jsonResponse.usableComoPlantilla).to.eql(true);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"usableComoPlantilla\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/colecciones/{{coleccionId}}/plantilla",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "colecciones",
+                "{{coleccionId}}",
+                "plantilla"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/colecciones?categoria=:categoria",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const jsonResponse = pm.response.json();",
+                  "",
+                  "pm.test(\"status code is 200\", () => {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"response has one item\", () => {",
+                  "    pm.expect(jsonResponse).to.have.lengthOf(1);",
+                  "});",
+                  "",
+                  "pm.test(\"data is ok\", () => {",
+                  "    pm.expect(jsonResponse[0].nombre).to.eql(pm.collectionVariables.get(\"nombre2\"));",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/colecciones?categoria=TEST_COLECCIONES&nombre={{nombre2}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "colecciones"
+              ],
+              "query": [
+                {
+                  "key": "categoria",
+                  "value": "TEST_COLECCIONES"
+                },
+                {
+                  "key": "nombre",
+                  "value": "{{nombre2}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/colecciones?categoria=:categoria (no data)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const jsonResponse = pm.response.json();",
+                  "",
+                  "pm.test(\"status code is 200\", () => {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"response has no items\", () => {",
+                  "    pm.expect(jsonResponse).to.have.lengthOf(0);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/colecciones?categoria=no-existe",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "colecciones"
+              ],
+              "query": [
+                {
+                  "key": "categoria",
+                  "value": "no-existe"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/colecciones/:id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"status code is 204\", () => {",
+                  "    pm.expect(pm.response.code).to.eql(204);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/colecciones/{{coleccionId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "colecciones",
+                "{{coleccionId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/colecciones/:id (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"status code is 404\", () => {",
+                  "    pm.expect(pm.response.code).to.eql(404);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/colecciones/{{coleccionId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "colecciones",
+                "{{coleccionId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/colecciones/:id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"status code is 204\", () => {",
+                  "    pm.expect(pm.response.code).to.eql(204);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/colecciones/{{coleccionId2}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "colecciones",
+                "{{coleccionId2}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /usuarios/:id (cleanup)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"status code is 204\", () => {",
+                  "    pm.expect(pm.response.code).to.eql(204);",
+                  "});",
+                  "",
+                  "pm.test(\"response body is empty\", () => {",
+                  "    pm.expect(pm.response.text()).to.be.empty;",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuarios/{{creadorId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{creadorId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "nombre1",
+      "value": "BTS Love Yourself Collection"
+    },
+    {
+      "key": "categoria1",
+      "value": "TEST_COLECCIONES"
+    },
+    {
+      "key": "nombre2",
+      "value": "Pokemon Primera Generacion"
+    },
+    {
+      "key": "categoria2",
+      "value": "TEST_COLECCIONES"
+    },
+    {
+      "key": "nombreCambiado",
+      "value": "BTS Butter Collection"
+    },
+    {
+      "key": "token_active",
+      "value": ""
+    },
+    {
+      "key": "coleccionId",
+      "value": ""
+    },
+    {
+      "key": "coleccionId2",
+      "value": ""
+    },
+    {
+      "key": "creadorId",
+      "value": ""
+    },
+    {
+      "key": "testEmail",
+      "value": "test.colecciones@gmail.com"
+    },
+    {
+      "key": "testPassword",
+      "value": "test1234"
+    }
+  ]
+}
