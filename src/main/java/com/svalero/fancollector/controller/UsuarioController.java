@@ -56,13 +56,6 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioEncontrado );
     }
 
-    @GetMapping("/{id}/admin")
-    @PreAuthorize("hasAnyRole('ADMIN','MODS')")
-    public ResponseEntity<UsuarioAdminOutDTO> obtenerUsuarioAdmin(
-            @PathVariable long id) {
-        UsuarioAdminOutDTO dto = usuarioService.buscarUsuarioPorIdAdmin(id);
-        return ResponseEntity.ok(dto);
-    }
 
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioOutDTO> modificarUsuario(

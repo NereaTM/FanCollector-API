@@ -2,7 +2,6 @@ package com.svalero.fancollector.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.svalero.fancollector.domain.enums.RolUsuario;
-import com.svalero.fancollector.dto.UsuarioAdminOutDTO;
 import com.svalero.fancollector.dto.UsuarioInDTO;
 import com.svalero.fancollector.dto.UsuarioOutDTO;
 import com.svalero.fancollector.dto.UsuarioPutDTO;
@@ -107,36 +106,6 @@ public class UsuarioControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
-
-    @Test
-    @WithMockUser(username = "nerea@test.com", roles = {"ADMIN"})
-    public void obtenerUsuarioAdmin_existente_devuelve200() throws Exception {
-        UsuarioAdminOutDTO adminDTO = new UsuarioAdminOutDTO();
-        adminDTO.setId(1L);
-        adminDTO.setNombre("Nerea");
-        adminDTO.setEmail("nerea@test.com");
-        adminDTO.setRol(RolUsuario.ADMIN);
-
-        when(usuarioService.buscarUsuarioPorIdAdmin(1L)).thenReturn(adminDTO);
-
-        mockMvc.perform(get("/usuarios/1/admin")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.email").value("nerea@test.com"));
-    }
-
-    @Test
-    @WithMockUser(username = "nerea@test.com", roles = {"ADMIN"})
-    public void obtenerUsuarioAdmin_noExiste_devuelve404() throws Exception {
-        when(usuarioService.buscarUsuarioPorIdAdmin(999L))
-                .thenThrow(new UsuarioNoEncontradoException(999L));
-
-        mockMvc.perform(get("/usuarios/999/admin")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
-    }
-
 
     @Test
     public void crearUsuario_datosValidos_devuelve201() throws Exception {

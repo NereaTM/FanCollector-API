@@ -1,7 +1,6 @@
 package com.svalero.fancollector.service;
 
 import com.svalero.fancollector.domain.enums.RolUsuario;
-import com.svalero.fancollector.dto.UsuarioAdminOutDTO;
 import com.svalero.fancollector.dto.UsuarioInDTO;
 import com.svalero.fancollector.dto.UsuarioOutDTO;
 import com.svalero.fancollector.dto.UsuarioPutDTO;
@@ -26,5 +25,4 @@ public interface UsuarioService {
 
     void borrarUsuario (long id, String emailUsuario, boolean esAdmin, boolean esMods);
 
-    UsuarioAdminOutDTO buscarUsuarioPorIdAdmin(long id);
 }
