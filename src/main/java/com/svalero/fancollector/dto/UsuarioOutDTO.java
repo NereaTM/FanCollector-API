@@ -10,7 +10,7 @@ public class UsuarioOutDTO {
 
     private Long id;
     private String nombre;
-   // private String email;
+    private String email;
     private RolUsuario rol;
     private String urlAvatar;
     private String descripcion;

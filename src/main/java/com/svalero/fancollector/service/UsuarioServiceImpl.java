@@ -2,7 +2,6 @@ package com.svalero.fancollector.service;
 
 import com.svalero.fancollector.domain.Usuario;
 import com.svalero.fancollector.domain.enums.RolUsuario;
-import com.svalero.fancollector.dto.UsuarioAdminOutDTO;
 import com.svalero.fancollector.dto.UsuarioInDTO;
 import com.svalero.fancollector.dto.UsuarioOutDTO;
 import com.svalero.fancollector.dto.UsuarioPutDTO;
@@ -65,12 +64,6 @@ public class UsuarioServiceImpl implements UsuarioService {
         return resultado;
     }
 
-    @Override
-    public UsuarioAdminOutDTO buscarUsuarioPorIdAdmin(long id) {
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new UsuarioNoEncontradoException(id));
-        return modelMapper.map(usuario, UsuarioAdminOutDTO.class);
-    }
 
     @Override
     public List<UsuarioOutDTO> listarUsuarios(String nombre, String email, RolUsuario rol) {
