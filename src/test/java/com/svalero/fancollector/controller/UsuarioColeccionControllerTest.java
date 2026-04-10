@@ -1,6 +1,7 @@
 package com.svalero.fancollector.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.svalero.fancollector.dto.UsuarioColeccionDetalleDTO;
 import com.svalero.fancollector.dto.UsuarioColeccionInDTO;
 import com.svalero.fancollector.dto.UsuarioColeccionOutDTO;
 import com.svalero.fancollector.dto.UsuarioColeccionPutDTO;
@@ -241,6 +242,69 @@ public class UsuarioColeccionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(inDTO)))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void listarUsuarioColeccionesV2_sinFiltros_devuelve200() throws Exception {
+        UsuarioColeccionDetalleDTO uc1 = new UsuarioColeccionDetalleDTO();
+        uc1.setId(1L);
+        uc1.setIdUsuario(1L);
+        uc1.setIdColeccion(1L);
+        uc1.setEsFavorita(true);
+        uc1.setEsCreador(true);
+        uc1.setEsVisible(true);
+        uc1.setNombreUsuario("Nerea Test");
+
+        UsuarioColeccionDetalleDTO uc2 = new UsuarioColeccionDetalleDTO();
+        uc2.setId(2L);
+        uc2.setIdUsuario(1L);
+        uc2.setIdColeccion(2L);
+        uc2.setEsFavorita(false);
+        uc2.setEsCreador(false);
+        uc2.setEsVisible(true);
+        uc2.setNombreUsuario("Nerea Test");
+
+        List<UsuarioColeccionDetalleDTO> lista = List.of(uc1, uc2);
+
+        when(usuarioColeccionService.listarV2(isNull(), isNull(), isNull(), isNull(), anyString(), anyBoolean(), anyBoolean()))
+                .thenReturn(lista);
+
+        mockMvc.perform(get("/usuario-colecciones/v2")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[0].nombreUsuario").value("Nerea Test"))
+                .andExpect(jsonPath("$[1].id").value(2L));
+    }
+
+    @Test
+    public void listarUsuarioColeccionesV2_conFiltroFavoritas_devuelve200() throws Exception {
+        UsuarioColeccionDetalleDTO uc = new UsuarioColeccionDetalleDTO();
+        uc.setId(1L);
+        uc.setIdUsuario(1L);
+        uc.setIdColeccion(1L);
+        uc.setEsFavorita(true);
+        uc.setNombreUsuario("Nerea Test");
+
+        when(usuarioColeccionService.listarV2(isNull(), isNull(), eq(true), isNull(), anyString(), anyBoolean(), anyBoolean()))
+                .thenReturn(List.of(uc));
+
+        mockMvc.perform(get("/usuario-colecciones/v2")
+                        .param("soloFavoritas", "true")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].esFavorita").value(true));
+    }
+
+    @Test
+    public void listarUsuarioColeccionesV2_listaVacia_devuelve200() throws Exception {
+        when(usuarioColeccionService.listarV2(isNull(), isNull(), isNull(), isNull(), anyString(), anyBoolean(), anyBoolean()))
+                .thenReturn(List.of());
+
+        mockMvc.perform(get("/usuario-colecciones/v2")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
     }
 
     @Test
