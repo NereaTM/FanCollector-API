@@ -2,9 +2,7 @@ package com.svalero.fancollector.service;
 
 import com.svalero.fancollector.domain.*;
 import com.svalero.fancollector.domain.enums.EstadoItem;
-import com.svalero.fancollector.dto.UsuarioColeccionInDTO;
-import com.svalero.fancollector.dto.UsuarioColeccionOutDTO;
-import com.svalero.fancollector.dto.UsuarioColeccionPutDTO;
+import com.svalero.fancollector.dto.*;
 import com.svalero.fancollector.dto.patches.UsuarioColeccionFavoritaDTO;
 import com.svalero.fancollector.dto.patches.UsuarioColeccionVisibleDTO;
 import com.svalero.fancollector.exception.domain.ColeccionNoEncontradaException;
@@ -171,6 +169,42 @@ public class UsuarioColeccionServiceImpl implements UsuarioColeccionService {
     }
 
     @Override
+    public List<UsuarioColeccionDetalleDTO> listarV2( Long idUsuario, Long idColeccion, Boolean soloFavoritas, Boolean esVisible, String emailUsuario, boolean esAdmin, boolean esMods) {
+
+        boolean noHayFiltros = true;
+
+        if (idUsuario != null) noHayFiltros = false;
+        if (idColeccion != null) noHayFiltros = false;
+        if (soloFavoritas != null) noHayFiltros = false;
+        if (esVisible != null) noHayFiltros = false;
+
+        List<UsuarioColeccion> relaciones;
+
+        if (noHayFiltros) {
+            relaciones = usuarioColeccionRepository.findAll();
+        } else {
+            relaciones = usuarioColeccionRepository.buscarPorFiltros(
+                    idUsuario, idColeccion, soloFavoritas, esVisible
+            );
+        }
+
+        Usuario usuarioActual = null;
+        if (emailUsuario != null && !emailUsuario.isBlank()) {
+            usuarioActual = currentUserResolver.usuarioActual(emailUsuario);
+        }
+
+        List<UsuarioColeccionDetalleDTO> resultado = new ArrayList<>();
+
+        for (UsuarioColeccion uc : relaciones) {
+            if (Permisos.puedeVerUsuarioColeccion(uc, usuarioActual, esAdmin, esMods)) {
+                resultado.add(toDetalleDTO(uc));
+            }
+        }
+
+        return resultado;
+    }
+
+    @Override
     public UsuarioColeccionOutDTO actualizar(Long id, UsuarioColeccionPutDTO dto, String emailUsuario, boolean esAdmin, boolean esMods) {
 
         UsuarioColeccion existente = usuarioColeccionRepository.findById(id)
@@ -241,5 +275,22 @@ public class UsuarioColeccionServiceImpl implements UsuarioColeccionService {
         );
 
         usuarioColeccionRepository.delete(uc);
+    }
+
+    private UsuarioColeccionDetalleDTO toDetalleDTO(UsuarioColeccion uc) {
+        UsuarioColeccionDetalleDTO dto = new UsuarioColeccionDetalleDTO();
+
+        dto.setId(uc.getId());
+        dto.setIdUsuario(uc.getUsuario().getId());
+        dto.setIdColeccion(uc.getColeccion().getId());
+        dto.setEsFavorita(uc.isEsFavorita());
+        dto.setEsCreador(uc.isEsCreador());
+        dto.setEsVisible(uc.isEsVisible());
+        dto.setFechaAgregada(uc.getFechaAgregada());
+
+        dto.setColeccion(modelMapper.map(uc.getColeccion(), ColeccionOutDTO.class));
+        dto.setNombreUsuario(uc.getUsuario().getNombre());
+
+        return dto;
     }
 }

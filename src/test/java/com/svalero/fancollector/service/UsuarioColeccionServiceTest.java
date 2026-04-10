@@ -2,6 +2,7 @@ package com.svalero.fancollector.service;
 
 import com.svalero.fancollector.domain.*;
 import com.svalero.fancollector.dto.UsuarioColeccionInDTO;
+import com.svalero.fancollector.dto.UsuarioColeccionDetalleDTO;
 import com.svalero.fancollector.dto.UsuarioColeccionOutDTO;
 import com.svalero.fancollector.dto.UsuarioColeccionPutDTO;
 import com.svalero.fancollector.dto.patches.UsuarioColeccionFavoritaDTO;
@@ -263,7 +264,7 @@ public class UsuarioColeccionServiceTest {
         when(usuarioColeccionRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(UsuarioColeccionNoEncontradoException.class, () ->
-            usuarioColeccionService.buscarPorId(999L, EMAIL, esAdmin, esMods)
+                usuarioColeccionService.buscarPorId(999L, EMAIL, esAdmin, esMods)
         );
 
         verify(usuarioColeccionRepository, times(1)).findById(999L);
@@ -304,6 +305,73 @@ public class UsuarioColeccionServiceTest {
         assertEquals(1L, resultado.get(0).getId());
         assertEquals(2L, resultado.get(1).getId());
         verify(usuarioColeccionRepository, times(1)).findAll();
+    }
+
+    @Test
+    public void listarV2_sinFiltros_devuelveDetalleDeTodas() {
+        boolean esAdmin = false;
+        boolean esMods = false;
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setId(1L);
+        usuarioActual.setNombre("Nerea Test");
+
+        Coleccion coleccion = new Coleccion();
+        coleccion.setId(1L);
+
+        UsuarioColeccion uc1 = new UsuarioColeccion();
+        uc1.setId(1L);
+        uc1.setUsuario(usuarioActual);
+        uc1.setColeccion(coleccion);
+
+        UsuarioColeccion uc2 = new UsuarioColeccion();
+        uc2.setId(2L);
+        uc2.setUsuario(usuarioActual);
+        uc2.setColeccion(coleccion);
+
+        when(currentUserResolver.usuarioActual(EMAIL)).thenReturn(usuarioActual);
+        when(usuarioColeccionRepository.findAll()).thenReturn(List.of(uc1, uc2));
+        when(modelMapper.map(any(Coleccion.class), eq(com.svalero.fancollector.dto.ColeccionOutDTO.class)))
+                .thenReturn(new com.svalero.fancollector.dto.ColeccionOutDTO());
+
+        List<UsuarioColeccionDetalleDTO> resultado = usuarioColeccionService.listarV2(null, null, null, null, EMAIL, esAdmin, esMods);
+
+        assertEquals(2, resultado.size());
+        assertEquals(1L, resultado.get(0).getId());
+        assertEquals(2L, resultado.get(1).getId());
+        verify(usuarioColeccionRepository, times(1)).findAll();
+    }
+
+    @Test
+    public void listarV2_conFiltros_usaBuscarPorFiltros() {
+        boolean esAdmin = true;
+        boolean esMods = false;
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setId(1L);
+        usuarioActual.setNombre("Nerea Test");
+
+        Coleccion coleccion = new Coleccion();
+        coleccion.setId(1L);
+
+        UsuarioColeccion uc = new UsuarioColeccion();
+        uc.setId(1L);
+        uc.setUsuario(usuarioActual);
+        uc.setColeccion(coleccion);
+        uc.setEsFavorita(true);
+
+        when(currentUserResolver.usuarioActual(EMAIL)).thenReturn(usuarioActual);
+        when(usuarioColeccionRepository.buscarPorFiltros(null, null, true, null))
+                .thenReturn(List.of(uc));
+        when(modelMapper.map(any(Coleccion.class), eq(com.svalero.fancollector.dto.ColeccionOutDTO.class)))
+                .thenReturn(new com.svalero.fancollector.dto.ColeccionOutDTO());
+
+        List<UsuarioColeccionDetalleDTO> resultado = usuarioColeccionService.listarV2(null, null, true, null, EMAIL, esAdmin, esMods);
+
+        assertEquals(1, resultado.size());
+        assertTrue(resultado.get(0).getEsFavorita());
+        verify(usuarioColeccionRepository, times(1)).buscarPorFiltros(null, null, true, null);
+        verify(usuarioColeccionRepository, never()).findAll();
     }
 
     @Test
@@ -450,7 +518,7 @@ public class UsuarioColeccionServiceTest {
         when(usuarioColeccionRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(UsuarioColeccionNoEncontradoException.class, () ->
-                        usuarioColeccionService.actualizarVisible(999L, dto, EMAIL, esAdmin, esMods)
+                usuarioColeccionService.actualizarVisible(999L, dto, EMAIL, esAdmin, esMods)
         );
 
         verify(usuarioColeccionRepository, times(1)).findById(999L);

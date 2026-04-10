@@ -1,5 +1,6 @@
 package com.svalero.fancollector.service;
 
+import com.svalero.fancollector.dto.UsuarioColeccionDetalleDTO;
 import com.svalero.fancollector.dto.UsuarioColeccionInDTO;
 import com.svalero.fancollector.dto.UsuarioColeccionOutDTO;
 import com.svalero.fancollector.dto.UsuarioColeccionPutDTO;
@@ -17,6 +18,8 @@ public interface UsuarioColeccionService {
     UsuarioColeccionOutDTO buscarPorId(Long id, String emailUsuario, boolean esAdmin, boolean esMods);
 
     List<UsuarioColeccionOutDTO> listar(Long idUsuario, Long idColeccion, Boolean soloFavoritas, Boolean esVisible, String emailUsuario, boolean esAdmin, boolean esMods);
+
+    List<UsuarioColeccionDetalleDTO> listarV2(Long idUsuario, Long idColeccion, Boolean soloFavoritas, Boolean esVisible, String emailUsuario, boolean esAdmin, boolean esMods);
 
     UsuarioColeccionOutDTO actualizar(Long id, UsuarioColeccionPutDTO dto, String emailUsuario, boolean esAdmin, boolean esMods);
 
