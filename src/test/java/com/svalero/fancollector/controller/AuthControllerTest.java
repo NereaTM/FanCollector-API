@@ -122,7 +122,7 @@ public class AuthControllerTest {
 
         when(authenticationManager.authenticate(any())).thenReturn(authToken);
         when(usuarioRepository.findByEmail("nerea@gmail.com")).thenReturn(Optional.of(usuario));
-        when(jwtService.generateToken(eq("nerea@gmail.com"), eq("USER"))).thenReturn("mock-jwt-token");
+        when(jwtService.generateToken(eq("nerea@gmail.com"), eq("USER"), eq (1L))).thenReturn("mock-jwt-token");
 
         mockMvc.perform(post("/auth/login")
                         .with(csrf())

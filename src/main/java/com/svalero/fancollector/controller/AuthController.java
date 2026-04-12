@@ -51,7 +51,7 @@ public class AuthController {
         Usuario usuario = usuarioRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> UsuarioNoEncontradoException.porEmail(authentication.getName()));
 
-        String token = jwtService.generateToken(usuario.getEmail(), usuario.getRol().name());
+        String token = jwtService.generateToken(usuario.getEmail(), usuario.getRol().name(), usuario.getId());
 
         Map<String, Object> response = new HashMap<>();
         response.put("token", token);
