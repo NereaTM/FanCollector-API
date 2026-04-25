@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fancollector-api
+  labels:
+    app: fancollector
+    tier: api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: fancollector
+      tier: api
+  template:
+    metadata:
+      labels:
+        app: fancollector
+        tier: api
+    spec:
+      containers:
+        - name: fancollector-api
+          image: a28731nerea/fancollector-api
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: fancollector-secrets
