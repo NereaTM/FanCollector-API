@@ -2,9 +2,9 @@ name: CI/CD Backend EKS
 
 on:
   push:
-    branches: [ "featurfeautre/cicd-eks" ]
+    branches: [ "feature/cicd-eks" ]
   pull_request:
-    branches: [ "featurfeautre/cicd-eks" ]
+    branches: [ "feature/cicd-eks" ]
 
 env:
   EKS_CLUSTER_NAME: fancollector-cluster
