@@ -45,3 +45,4 @@ uploads/
 
 ### Configuración local ###
 application-dev.properties
+secret.yaml

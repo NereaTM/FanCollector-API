@@ -66,7 +66,7 @@ public class SecurityConfig {
     UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:5500", "http://127.0.0.1:5500","http://localhost:5173",
-                "http://127.0.0.1:5173"));
+                "http://127.0.0.1:5173","http://a60c9c1c991544feb87b2e8abec893ee-1000498456.us-east-1.elb.amazonaws.com"));
         configuration.setAllowedMethods(Arrays.asList("GET","POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
