@@ -6,6 +6,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import com.svalero.fancollector.domain.Usuario;
 
 import java.security.Key;
 import java.util.Date;
@@ -23,12 +24,14 @@ public class JwtService {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
-    public String generateToken(String email) {
+    public String generateToken(String email, String rol, long id) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpiration * 1000);
 
         return Jwts.builder()
                 .setSubject(email)
+                .claim("rol", rol)
+                .claim("id", id)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -42,6 +45,15 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+
+    public String getRolFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("rol", String.class);
     }
 
     public boolean validateToken(String token) {

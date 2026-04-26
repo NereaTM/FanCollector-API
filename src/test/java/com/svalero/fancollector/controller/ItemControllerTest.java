@@ -8,11 +8,14 @@ import com.svalero.fancollector.dto.ItemPutDTO;
 import com.svalero.fancollector.dto.patches.ItemRarezaDTO;
 import com.svalero.fancollector.exception.domain.ColeccionNoEncontradaException;
 import com.svalero.fancollector.exception.domain.ItemNoEncontradoException;
+import com.svalero.fancollector.exception.validation.RelacionYaExisteException;
 import com.svalero.fancollector.security.jwt.JwtService;
 import com.svalero.fancollector.service.ItemService;
+import com.svalero.fancollector.util.ImagenUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -41,6 +44,9 @@ public class ItemControllerTest {
     private JwtService jwtService;
 
     @MockitoBean
+    private ImagenUtil imagenUtil;
+
+    @MockitoBean
     private ItemService itemService;
 
     @MockitoBean
@@ -50,7 +56,7 @@ public class ItemControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
-    public void testListarItems() throws Exception {
+    public void listarItems_sinFiltros_devuelve200() throws Exception {
         ItemOutDTO item1 = new ItemOutDTO();
         item1.setId(1L);
         item1.setNombre("Darkrai");
@@ -75,7 +81,7 @@ public class ItemControllerTest {
     }
 
     @Test
-    public void testBuscarItemPorIdExistente() throws Exception {
+    public void buscarItemPorId_existente_devuelve200() throws Exception {
         ItemOutDTO itemOutDTO = new ItemOutDTO();
         itemOutDTO.setId(1L);
         itemOutDTO.setNombre("Darkrai");
@@ -91,7 +97,7 @@ public class ItemControllerTest {
     }
 
     @Test
-    public void testBuscarItemPorIdNoExiste() throws Exception {
+    public void buscarItemPorId_noExiste_devuelve404() throws Exception {
         when(itemService.buscarItemPorId(eq(999L), anyString(), anyBoolean(), anyBoolean()))
                 .thenThrow(new ItemNoEncontradoException(999L));
 
@@ -101,7 +107,7 @@ public class ItemControllerTest {
     }
 
     @Test
-    public void testCrearItemDatosValidos() throws Exception {
+    public void crearItem_datosValidos_devuelve201() throws Exception {
         ItemInDTO itemInDTO = new ItemInDTO();
         itemInDTO.setIdColeccion(1L);
         itemInDTO.setNombre("Darkrai");
@@ -116,18 +122,19 @@ public class ItemControllerTest {
         when(itemService.crearItem(any(ItemInDTO.class), anyString(), anyBoolean(), anyBoolean()))
                 .thenReturn(savedDto);
 
-        mockMvc.perform(post("/items")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(itemInDTO))
-                        .accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(multipart("/items")
+                        .param("idColeccion", "999")
+                        .param("nombre", "Darkrai")
+                        .param("tipo", "Figura")
+                        .param("rareza", "LEGENDARIO")
+                        .with(csrf()))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.nombre").value("Darkrai"));
     }
 
     @Test
-    public void testCrearItemBodyInvalido() throws Exception {
+    public void crearItem_bodyInvalido_devuelve400() throws Exception {
         mockMvc.perform(post("/items")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -137,7 +144,7 @@ public class ItemControllerTest {
     }
 
     @Test
-    public void testCrearItemColeccionNoExiste() throws Exception {
+    public void crearItem_coleccionNoExiste_devuelve404() throws Exception {
         ItemInDTO itemInDTO = new ItemInDTO();
         itemInDTO.setIdColeccion(999L);
         itemInDTO.setNombre("Darkrai");
@@ -147,15 +154,31 @@ public class ItemControllerTest {
         when(itemService.crearItem(any(ItemInDTO.class), anyString(), anyBoolean(), anyBoolean()))
                 .thenThrow(new ColeccionNoEncontradaException(999L));
 
-        mockMvc.perform(post("/items")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(itemInDTO)))
+        mockMvc.perform(multipart("/items")
+                        .param("idColeccion", "999")
+                        .param("nombre", "Darkrai")
+                        .param("tipo", "Figura")
+                        .param("rareza", "LEGENDARIO")
+                        .with(csrf()))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    public void testModificarItemExistente() throws Exception {
+    public void crearItem_relacionDuplicada_devuelve400() throws Exception {
+        when(itemService.crearItem(any(ItemInDTO.class), anyString(), anyBoolean(), anyBoolean()))
+                .thenThrow(new RelacionYaExisteException("El item ya existe en esta colección"));
+
+        mockMvc.perform(multipart("/items")
+                        .param("idColeccion", "1")
+                        .param("nombre", "Darkrai")
+                        .param("tipo", "Figura")
+                        .param("rareza", "LEGENDARIO")
+                        .with(csrf()))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void modificarItem_existente_devuelve200() throws Exception {
         ItemPutDTO itemPutDTO = new ItemPutDTO();
         itemPutDTO.setNombre("Darkrai");
         itemPutDTO.setTipo("Figura Premium");
@@ -166,36 +189,43 @@ public class ItemControllerTest {
         response.setNombre("Darkrai");
         response.setRareza(RarezaItem.EPICO);
 
+        ItemOutDTO itemActual = new ItemOutDTO();
+        itemActual.setId(1L);
+        when(itemService.buscarItemPorId(eq(1L), anyString(), anyBoolean(), anyBoolean())).thenReturn(itemActual);
+
+
         when(itemService.actualizarItem(eq(1L), any(ItemPutDTO.class), anyString(), anyBoolean(), anyBoolean()))
                 .thenReturn(response);
 
-        mockMvc.perform(put("/items/1")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(itemPutDTO)))
+        mockMvc.perform(multipart(HttpMethod.PUT, "/items/1")
+                        .param("nombre", "Darkrai")
+                        .param("tipo", "Figura Premium")
+                        .param("rareza", "EPICO")
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nombre").value("Darkrai"));
     }
 
     @Test
-    public void testModificarItemNoExiste() throws Exception {
-        ItemPutDTO itemPutDTO = new ItemPutDTO();
-        itemPutDTO.setNombre("Darkrai");
-        itemPutDTO.setTipo("Figura");
-        itemPutDTO.setRareza("COMUN");
+    public void modificarItem_noExiste_devuelve404() throws Exception {
+        ItemOutDTO itemActual = new ItemOutDTO();
+        itemActual.setId(1L);
+        when(itemService.buscarItemPorId(eq(1L), anyString(), anyBoolean(), anyBoolean()))
+                .thenReturn(itemActual);
 
         when(itemService.actualizarItem(eq(1L), any(ItemPutDTO.class), anyString(), anyBoolean(), anyBoolean()))
                 .thenThrow(new ItemNoEncontradoException(1L));
 
-        mockMvc.perform(put("/items/1")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(itemPutDTO)))
+        mockMvc.perform(multipart(HttpMethod.PUT, "/items/1")
+                        .param("nombre", "Darkrai")
+                        .param("tipo", "Figura")
+                        .param("rareza", "COMUN")
+                        .with(csrf()))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    public void testModificarItemBodyInvalido() throws Exception {
+    public void modificarItem_bodyInvalido_devuelve400() throws Exception {
         mockMvc.perform(put("/items/1")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -204,7 +234,7 @@ public class ItemControllerTest {
     }
 
     @Test
-    public void testActualizarRareza() throws Exception {
+    public void actualizarRareza_itemExistente_devuelve200() throws Exception {
         ItemRarezaDTO rarezaDTO = new ItemRarezaDTO();
         rarezaDTO.setRareza(RarezaItem.LEGENDARIO);
 
@@ -223,7 +253,7 @@ public class ItemControllerTest {
     }
 
     @Test
-    public void testActualizarRarezaItemNoExiste() throws Exception {
+    public void actualizarRareza_itemNoExiste_devuelve404() throws Exception {
         ItemRarezaDTO rarezaDTO = new ItemRarezaDTO();
         rarezaDTO.setRareza(RarezaItem.LEGENDARIO);
 
@@ -238,7 +268,7 @@ public class ItemControllerTest {
     }
 
     @Test
-    public void testActualizarRarezaBodyInvalido() throws Exception {
+    public void actualizarRareza_bodyInvalido_devuelve400() throws Exception {
         mockMvc.perform(patch("/items/1/rareza")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -247,14 +277,14 @@ public class ItemControllerTest {
     }
 
     @Test
-    public void testEliminarItemExistente() throws Exception {
+    public void eliminarItem_existente_devuelve204() throws Exception {
         mockMvc.perform(delete("/items/1")
                         .with(csrf()))
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    public void testEliminarItemNoExiste() throws Exception {
+    public void eliminarItem_noExiste_devuelve404() throws Exception {
         doThrow(new ItemNoEncontradoException(1L))
                 .when(itemService).eliminarItem(eq(1L), anyString(), anyBoolean(), anyBoolean());
 

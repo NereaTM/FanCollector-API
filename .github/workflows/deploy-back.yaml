@@ -1,0 +1,67 @@
+name: CI/CD Backend EKS
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  EKS_CLUSTER_NAME: fancollector-cluster
+  AWS_REGION: us-east-1
+
+jobs:
+  build:
+    name: Construcción y despliegue del Backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar código del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Iniciar sesión en Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Preparar TAG de la imagen Docker
+        id: docker_meta
+        uses: docker/metadata-action@v5
+        with:
+          images: a28731nerea/fancollector-api
+          flavor: |
+            latest=false
+          # CAMBIAR LA VERSIÓN EN FUNCION DE LA NECESIDAD!
+          tags: |
+            type=raw,value=v3 
+
+      - name: Construir y subir imagen Docker
+        id: docker_build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Configurar credenciales de AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Actualizar configuración de kubeconfig
+        run: aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
+
+      - name: Desplegar backend en EKS
+        run: |
+          kubectl apply -f k8s/api-deployment.yaml

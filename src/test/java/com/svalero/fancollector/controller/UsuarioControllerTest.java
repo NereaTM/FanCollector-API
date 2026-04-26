@@ -8,11 +8,14 @@ import com.svalero.fancollector.dto.UsuarioPutDTO;
 import com.svalero.fancollector.dto.patches.UsuarioPasswordDTO;
 import com.svalero.fancollector.dto.patches.UsuarioRolDTO;
 import com.svalero.fancollector.exception.domain.UsuarioNoEncontradoException;
+import com.svalero.fancollector.exception.validation.EmailDuplicadoException;
 import com.svalero.fancollector.security.jwt.JwtService;
 import com.svalero.fancollector.service.UsuarioService;
+import com.svalero.fancollector.util.ImagenUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -42,6 +45,9 @@ public class UsuarioControllerTest {
     JwtService jwtService;
 
     @MockitoBean
+    private ImagenUtil imagenUtil;
+
+    @MockitoBean
     private UserDetailsService userDetailsService;
 
     @MockitoBean
@@ -51,7 +57,7 @@ public class UsuarioControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
-    public void testListarUsuarios() throws Exception {
+    public void listarUsuarios_sinFiltros_devuelve200() throws Exception {
         UsuarioOutDTO usuario1 = new UsuarioOutDTO();
         usuario1.setId(1L);
         usuario1.setNombre("Nerea");
@@ -76,7 +82,7 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void testBuscarUsuarioPorIdExistente() throws Exception {
+    public void buscarUsuarioPorId_existente_devuelve200() throws Exception {
         UsuarioOutDTO usuarioOutDTO = new UsuarioOutDTO();
         usuarioOutDTO.setId(1L);
         usuarioOutDTO.setNombre("Nerea");
@@ -92,7 +98,7 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void testBuscarUsuarioPorIdNoExiste() throws Exception {
+    public void buscarUsuarioPorId_noExiste_devuelve404() throws Exception {
         when(usuarioService.buscarUsuarioPorId(999L))
                 .thenThrow(new UsuarioNoEncontradoException(999L));
 
@@ -102,7 +108,7 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void testCrearUsuarioDatosValidos() throws Exception {
+    public void crearUsuario_datosValidos_devuelve201() throws Exception {
         UsuarioInDTO usuarioInDTO = new UsuarioInDTO();
         usuarioInDTO.setNombre("Nerea");
         usuarioInDTO.setEmail("nerea@gmail.com");
@@ -127,7 +133,7 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void testCrearUsuarioBodyInvalido() throws Exception {
+    public void crearUsuario_bodyInvalido_devuelve400() throws Exception {
         mockMvc.perform(post("/usuarios")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -137,10 +143,32 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void testModificarUsuarioExistente() throws Exception {
+    public void crearUsuario_emailDuplicado_devuelve400() throws Exception {
+        UsuarioInDTO usuarioInDTO = new UsuarioInDTO();
+        usuarioInDTO.setNombre("Nerea");
+        usuarioInDTO.setEmail("nerea@gmail.com");
+        usuarioInDTO.setContrasena("password123");
+
+        when(usuarioService.crearUsuarioComoAdmin(any(UsuarioInDTO.class), anyString(), anyBoolean()))
+                .thenThrow(new EmailDuplicadoException("nerea@gmail.com"));
+
+        mockMvc.perform(post("/usuarios")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(usuarioInDTO)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void modificarUsuario_existente_devuelve200() throws Exception {
         UsuarioPutDTO usuarioPutDTO = new UsuarioPutDTO();
         usuarioPutDTO.setNombre("Nerea Modificada");
         usuarioPutDTO.setEmail("nerea@gmail.com");
+
+        UsuarioOutDTO usuarioActual = new UsuarioOutDTO();
+        usuarioActual.setId(1L);
+        when(usuarioService.buscarUsuarioPorId(1L)).thenReturn(usuarioActual);
+
 
         UsuarioOutDTO response = new UsuarioOutDTO();
         response.setId(1L);
@@ -150,32 +178,37 @@ public class UsuarioControllerTest {
                 eq(1L), any(UsuarioPutDTO.class), anyString(), anyBoolean(), anyBoolean()
         )).thenReturn(response);
 
-        mockMvc.perform(put("/usuarios/1")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(usuarioPutDTO)))
+        mockMvc.perform(multipart(HttpMethod.PUT, "/usuarios/1")
+                        .param("nombre", "Nerea Modificada")
+                        .param("email", "nerea@gmail.com")
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nombre").value("Nerea Modificada"));
     }
 
     @Test
-    public void testModificarUsuarioNoExiste() throws Exception {
+    public void modificarUsuario_noExiste_devuelve404() throws Exception {
         UsuarioPutDTO usuarioPutDTO = new UsuarioPutDTO();
         usuarioPutDTO.setNombre("Nerea");
         usuarioPutDTO.setEmail("nerea@gmail.com");
 
+        UsuarioOutDTO usuarioActual = new UsuarioOutDTO();
+        usuarioActual.setId(1L);
+        when(usuarioService.buscarUsuarioPorId(1L)).thenReturn(usuarioActual);
+
+
         when(usuarioService.modificarUsuario(eq(1L), any(UsuarioPutDTO.class), anyString(), anyBoolean(), anyBoolean()
         )).thenThrow(new UsuarioNoEncontradoException(1L));
 
-        mockMvc.perform(put("/usuarios/1")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(usuarioPutDTO)))
+        mockMvc.perform(multipart(HttpMethod.PUT, "/usuarios/1")
+                        .param("nombre", "Nerea")
+                        .param("email", "nerea@gmail.com")
+                        .with(csrf()))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    public void testModificarUsuarioBodyInvalido() throws Exception {
+    public void modificarUsuario_bodyInvalido_devuelve400() throws Exception {
         mockMvc.perform(put("/usuarios/1")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -184,7 +217,7 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void testActualizarContrasena() throws Exception {
+    public void actualizarContrasena_datosValidos_devuelve200() throws Exception {
         UsuarioPasswordDTO passwordDTO = new UsuarioPasswordDTO();
         passwordDTO.setContrasena("newpassword123");
 
@@ -204,7 +237,22 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void testActualizarRol() throws Exception {
+    public void actualizarContrasena_noExiste_devuelve404() throws Exception {
+        UsuarioPasswordDTO dto = new UsuarioPasswordDTO();
+        dto.setContrasena("newpassword");
+
+        when(usuarioService.actualizarContrasena(eq(999L), anyString(), anyString(), anyBoolean(), anyBoolean()))
+                .thenThrow(new UsuarioNoEncontradoException(999L));
+
+        mockMvc.perform(patch("/usuarios/999/contrasena")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void actualizarRol_datosValidos_devuelve200() throws Exception {
         UsuarioRolDTO rolDTO = new UsuarioRolDTO();
         rolDTO.setRol(RolUsuario.MODS);
 
@@ -225,14 +273,29 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void testEliminarUsuarioExistente() throws Exception {
+    public void actualizarRol_noExiste_devuelve404() throws Exception {
+        UsuarioRolDTO dto = new UsuarioRolDTO();
+        dto.setRol(RolUsuario.MODS);
+
+        when(usuarioService.actualizarRol(eq(999L), any(RolUsuario.class), anyString()))
+                .thenThrow(new UsuarioNoEncontradoException(999L));
+
+        mockMvc.perform(patch("/usuarios/999/rol")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void eliminarUsuario_existente_devuelve204() throws Exception {
         mockMvc.perform(delete("/usuarios/1")
                         .with(csrf()))
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    public void testEliminarUsuarioNoExiste() throws Exception {
+    public void eliminarUsuario_noExiste_devuelve404() throws Exception {
         doThrow(new UsuarioNoEncontradoException(1L))
                 .when(usuarioService).borrarUsuario(eq(1L), anyString(), anyBoolean(), anyBoolean());
 

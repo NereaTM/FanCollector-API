@@ -7,6 +7,7 @@ import com.svalero.fancollector.dto.UsuarioOutDTO;
 import com.svalero.fancollector.dto.UsuarioPutDTO;
 import com.svalero.fancollector.exception.domain.UsuarioNoEncontradoException;
 import com.svalero.fancollector.exception.validation.EmailDuplicadoException;
+import com.svalero.fancollector.exception.security.AccesoDenegadoException;
 import com.svalero.fancollector.repository.UsuarioRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +40,7 @@ public class UsuarioServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @Test
-    public void testCrearUsuario() {
+    public void crearUsuario_datosValidos_devuelveUsuarioCreado() {
         UsuarioInDTO usuarioInDTO = new UsuarioInDTO();
         usuarioInDTO.setNombre("Nerea");
         usuarioInDTO.setEmail(EMAIL);
@@ -59,7 +60,7 @@ public class UsuarioServiceTest {
         UsuarioOutDTO usuarioOutDTO = new UsuarioOutDTO();
         usuarioOutDTO.setId(1L);
         usuarioOutDTO.setNombre("Nerea");
-        usuarioOutDTO.setRol(RolUsuario.ADMIN);
+        usuarioOutDTO.setRol(RolUsuario.USER);
         guardado.setContrasena("ENC(123456)");
 
         when(usuarioRepository.existsByEmail(EMAIL)).thenReturn(false);
@@ -72,7 +73,7 @@ public class UsuarioServiceTest {
 
         assertEquals(1L, resultado.getId());
         assertEquals("Nerea", resultado.getNombre());
-        assertEquals(RolUsuario.ADMIN, resultado.getRol());
+        assertEquals(RolUsuario.USER, resultado.getRol());
 
         verify(usuarioRepository).existsByEmail(EMAIL);
         verify(passwordEncoder).encode("123456");
@@ -80,22 +81,33 @@ public class UsuarioServiceTest {
     }
 
     @Test
-    public void testCrearUsuarioEmailDuplicado() {
+    public void crearUsuario_emailDuplicado_lanzaEmailDuplicadoException() {
         UsuarioInDTO usuarioInDTO = new UsuarioInDTO();
-        usuarioInDTO.setEmail("EMAIL");
+        usuarioInDTO.setEmail(EMAIL);
 
-        when(usuarioRepository.existsByEmail("EMAIL")).thenReturn(true);
+        when(usuarioRepository.existsByEmail(EMAIL)).thenReturn(true);
 
         assertThrows(EmailDuplicadoException.class, () -> {
             usuarioService.crearUsuario(usuarioInDTO);
         });
 
-        verify(usuarioRepository, times(1)).existsByEmail("EMAIL");
-        verify(usuarioRepository, times(0)).save(any(Usuario.class));
+        verify(usuarioRepository, times(1)).existsByEmail(EMAIL);
+        verify(usuarioRepository, never()).save(any(Usuario.class));
     }
 
     @Test
-    public void testBuscarUsuarioPorId() throws UsuarioNoEncontradoException {
+    public void crearUsuarioComoAdmin_sinPermisoAdmin_lanzaAccesoDenegadoException() {
+        UsuarioInDTO dto = new UsuarioInDTO();
+        dto.setEmail(EMAIL);
+
+        assertThrows(AccesoDenegadoException.class,
+                () -> usuarioService.crearUsuarioComoAdmin(dto, EMAIL, false));
+
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+    }
+
+    @Test
+    public void buscarUsuarioPorId_existente_devuelveUsuario() {
         Usuario usuario = new Usuario();
         usuario.setId(1L);
         usuario.setNombre("Nerea");
@@ -115,7 +127,7 @@ public class UsuarioServiceTest {
     }
 
     @Test
-    public void testBuscarUsuarioPorIdNoEncontrado() {
+    public void buscarUsuarioPorId_noExiste_lanzaUsuarioNoEncontradoException() {
         when(usuarioRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(UsuarioNoEncontradoException.class, () -> {
@@ -126,7 +138,7 @@ public class UsuarioServiceTest {
     }
 
     @Test
-    public void testListarUsuarios() {
+    public void listarUsuarios_sinFiltros_devuelveTodos() {
         Usuario usuario1 = new Usuario();
         usuario1.setId(1L);
         usuario1.setNombre("Nerea");
@@ -158,8 +170,7 @@ public class UsuarioServiceTest {
     }
 
     @Test
-    public void testModificarUsuario() throws UsuarioNoEncontradoException {
-        final String EMAIL = "EMAIL";
+    public void modificarUsuario_datosValidos_devuelveUsuarioActualizado() {
         boolean esAdmin = false;
         boolean esMods = false;
 
@@ -193,8 +204,7 @@ public class UsuarioServiceTest {
     }
 
     @Test
-    public void testModificarUsuarioNoEncontrado() {
-        final String EMAIL = "EMAIL";
+    public void modificarUsuario_noExiste_lanzaUsuarioNoEncontradoException() {
         boolean esAdmin = false;
         boolean esMods = false;
 
@@ -209,12 +219,27 @@ public class UsuarioServiceTest {
         });
 
         verify(usuarioRepository, times(1)).findById(999L);
-        verify(usuarioRepository, times(0)).save(any(Usuario.class));
+        verify(usuarioRepository, never()).save(any(Usuario.class));
     }
 
     @Test
-    public void testActualizarContrasena() throws UsuarioNoEncontradoException {
-        final String EMAIL = "EMAIL";
+    public void modificarUsuario_sinPermiso_lanzaAccesoDenegadoException() {
+        UsuarioPutDTO dto = new UsuarioPutDTO();
+        dto.setEmail("otroemail@gmail.com");
+        Usuario existente = new Usuario();
+        existente.setId(1L);
+        existente.setEmail("otroemail@gmail.com");
+
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(existente));
+
+        assertThrows(AccesoDenegadoException.class,
+                () -> usuarioService.modificarUsuario(1L, dto, EMAIL, false, false));
+
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+    }
+
+    @Test
+    public void actualizarContrasena_datosValidos_actualizaContrasena() {
         boolean esAdmin = false;
         boolean esMods = false;
 
@@ -244,8 +269,22 @@ public class UsuarioServiceTest {
     }
 
     @Test
-    public void testBorrarUsuario() throws UsuarioNoEncontradoException {
-        final String EMAIL = "EMAIL";
+    public void actualizarRol_adminIntentaDegradarse_lanzaAccesoDenegadoException() {
+        Usuario usuario = new Usuario();
+        usuario.setId(1L);
+        usuario.setEmail(EMAIL);
+        usuario.setRol(RolUsuario.ADMIN);
+
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+
+        assertThrows(AccesoDenegadoException.class,
+                () -> usuarioService.actualizarRol(1L, RolUsuario.USER, EMAIL));
+
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+    }
+
+    @Test
+    public void borrarUsuario_existente_eliminaCorrectamente() {
         boolean esAdmin = false;
         boolean esMods = false;
 
@@ -262,8 +301,7 @@ public class UsuarioServiceTest {
     }
 
     @Test
-    public void testBorrarUsuarioNoEncontrado() {
-        final String EMAIL = "EMAIL";
+    public void borrarUsuario_noExiste_lanzaUsuarioNoEncontradoException() {
         boolean esAdmin = false;
         boolean esMods = false;
 
@@ -274,6 +312,36 @@ public class UsuarioServiceTest {
         });
 
         verify(usuarioRepository).findById(999L);
+        verify(usuarioRepository, never()).delete(any(Usuario.class));
+    }
+
+    @Test
+    public void borrarUsuario_adminIntentaBorrarseSiMismo_lanzaAccesoDenegadoException() {
+        Usuario usuario = new Usuario();
+        usuario.setId(1L);
+        usuario.setEmail(EMAIL);
+        usuario.setRol(RolUsuario.ADMIN);
+
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+
+        assertThrows(AccesoDenegadoException.class,
+                () -> usuarioService.borrarUsuario(1L, EMAIL, true, false));
+
+        verify(usuarioRepository, never()).delete(any(Usuario.class));
+    }
+
+    @Test
+    public void borrarUsuario_modsIntentaBorrarAdmin_lanzaAccesoDenegadoException() {
+        Usuario admin = new Usuario();
+        admin.setId(1L);
+        admin.setEmail("admin@test.com");
+        admin.setRol(RolUsuario.ADMIN);
+
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(admin));
+
+        assertThrows(AccesoDenegadoException.class,
+                () -> usuarioService.borrarUsuario(1L, EMAIL, false, true));
+
         verify(usuarioRepository, never()).delete(any(Usuario.class));
     }
 }

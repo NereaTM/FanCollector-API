@@ -12,13 +12,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(
-        name = "usuario_items",
+@Table(name = "usuario_items",
         uniqueConstraints = @UniqueConstraint(
                 name = "unique_usuario_coleccion_item",
-                columnNames = {"usuario_id", "coleccion_id", "item_id"}
-        )
-)
+                columnNames = {"usuario_id", "coleccion_id", "item_id"}))
+
 public class UsuarioItem {
 
     @Id
@@ -48,7 +46,7 @@ public class UsuarioItem {
     @Column
     private String notas;
 
-    @Column(name = "es_visible") //PATCH
+    @Column(name = "es_visible")
     private boolean esVisible = true;
 
     @Column(name = "fecha_registro")

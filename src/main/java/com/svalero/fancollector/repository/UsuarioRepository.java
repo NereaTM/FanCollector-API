@@ -23,7 +23,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
        AND (:email IS NULL OR LOWER(u.email) LIKE CONCAT('%', LOWER(:email), '%'))
        AND (:rol IS NULL OR u.rol = :rol)
        """)
-    List<Usuario> buscarPorFiltros(@Param("nombre") String nombre,
-                                   @Param("email") String email,
-                                   @Param("rol") RolUsuario rol);
+    List<Usuario> buscarPorFiltros(
+            @Param("nombre") String nombre,
+            @Param("email") String email,
+            @Param("rol") RolUsuario rol);
 }

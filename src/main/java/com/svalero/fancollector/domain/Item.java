@@ -7,6 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,8 +29,8 @@ public class Item {
     @Column(nullable = false, length = 150)
     private String nombre;
 
-    @Lob
-    @Column
+
+    @Column(columnDefinition = "TEXT")
     private String descripcion;
 
     @Column(name = "imagen_url", length = 500)
@@ -36,9 +39,12 @@ public class Item {
     @Column(length = 50)
     private String tipo;
 
-    @Enumerated(EnumType.STRING) //PATCH
+    @Enumerated(EnumType.STRING)
     private RarezaItem rareza = RarezaItem.COMUN;
 
     @Column(name = "anio_lanzamiento")
     private Integer anioLanzamiento;
+
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UsuarioItem> usuarioItems = new ArrayList<>();
 }

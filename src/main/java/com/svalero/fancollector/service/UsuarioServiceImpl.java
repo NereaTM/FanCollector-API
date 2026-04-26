@@ -56,13 +56,14 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public UsuarioOutDTO buscarUsuarioPorId(long id) throws UsuarioNoEncontradoException {
+    public UsuarioOutDTO buscarUsuarioPorId(long id) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new UsuarioNoEncontradoException(id));
 
         UsuarioOutDTO resultado = modelMapper.map(usuario, UsuarioOutDTO.class);
         return resultado;
     }
+
 
     @Override
     public List<UsuarioOutDTO> listarUsuarios(String nombre, String email, RolUsuario rol) {
@@ -87,22 +88,20 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public UsuarioOutDTO modificarUsuario(
-            long id, UsuarioPutDTO dto, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws UsuarioNoEncontradoException {
+    public UsuarioOutDTO modificarUsuario(long id, UsuarioPutDTO usuarioPutDTO, String emailUsuario, boolean esAdmin, boolean esMods) {
 
         Usuario existente = usuarioRepository.findById(id)
                 .orElseThrow(() -> new UsuarioNoEncontradoException(id));
 
         Permisos.checkPuedeEditarUsuario(existente, emailUsuario, esAdmin, esMods);
 
-        existente.setNombre(dto.getNombre());
-        existente.setUrlAvatar(dto.getUrlAvatar());
-        existente.setDescripcion(dto.getDescripcion());
-        existente.setContactoPublico(dto.getContactoPublico());
+        existente.setNombre(usuarioPutDTO.getNombre());
+        existente.setUrlAvatar(usuarioPutDTO.getUrlAvatar());
+        existente.setDescripcion(usuarioPutDTO.getDescripcion());
+        existente.setContactoPublico(usuarioPutDTO.getContactoPublico());
 
         // Validar email si cambió
-        String email = dto.getEmail();
+        String email = usuarioPutDTO.getEmail();
         if (email != null && !email.equalsIgnoreCase(existente.getEmail())) {
             if (usuarioRepository.existsByEmailAndIdNot(email, id)) {
                 throw new EmailDuplicadoException(email);
@@ -115,8 +114,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public UsuarioOutDTO actualizarContrasena(long id, String nuevaContrasena,  String emailUsuario, boolean esAdmin, boolean esMods)
-            throws UsuarioNoEncontradoException {
+    public UsuarioOutDTO actualizarContrasena(long id, String nuevaContrasena, String emailUsuario, boolean esAdmin, boolean esMods) {
 
         Usuario existente = usuarioRepository.findById(id)
                 .orElseThrow(() -> new UsuarioNoEncontradoException(id));
@@ -130,8 +128,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @PreAuthorize("hasRole('ADMIN')")
     @Override
-    public UsuarioOutDTO actualizarRol(long id, RolUsuario nuevoRol, String emailUsuario)
-            throws UsuarioNoEncontradoException {
+    public UsuarioOutDTO actualizarRol(long id, RolUsuario nuevoRol, String emailUsuario) {
 
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new UsuarioNoEncontradoException(id));
@@ -147,8 +144,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public void borrarUsuario(long id, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws UsuarioNoEncontradoException {
+    public void borrarUsuario(long id, String emailUsuario, boolean esAdmin, boolean esMods) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new UsuarioNoEncontradoException(id));
 
@@ -156,6 +152,11 @@ public class UsuarioServiceImpl implements UsuarioService {
         // el admin no se puede autoeliminar
         if (esAdmin && usuario.getEmail().equalsIgnoreCase(emailUsuario)) {
             throw new AccesoDenegadoException("No puedes borrarte la cuenta a ti mismo");
+        }
+
+        // un moderador no puede borrar a un admin
+        if (esMods && !esAdmin && usuario.getRol() == RolUsuario.ADMIN) {
+            throw new AccesoDenegadoException("No tienes permisos para eliminar a un administrador");
         }
 
         usuarioRepository.delete(usuario);

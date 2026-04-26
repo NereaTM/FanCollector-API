@@ -2,7 +2,6 @@ package com.svalero.fancollector.security.auth;
 
 import com.svalero.fancollector.domain.Usuario;
 import com.svalero.fancollector.repository.UsuarioRepository;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,7 @@ public class UserDetailsService implements org.springframework.security.core.use
         return new org.springframework.security.core.userdetails.User(
                 usuario.getEmail(),
                 usuario.getContrasena(),
-                List.of(new SimpleGrantedAuthority(role))
+                List.of()
         );
     }
 }

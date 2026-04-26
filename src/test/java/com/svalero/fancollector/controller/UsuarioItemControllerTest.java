@@ -10,6 +10,7 @@ import com.svalero.fancollector.exception.domain.ColeccionNoEncontradaException;
 import com.svalero.fancollector.exception.domain.ItemNoEncontradoException;
 import com.svalero.fancollector.exception.domain.UsuarioItemNoEncontradoException;
 import com.svalero.fancollector.exception.domain.UsuarioNoEncontradoException;
+import com.svalero.fancollector.exception.validation.RelacionYaExisteException;
 import com.svalero.fancollector.security.jwt.JwtService;
 import com.svalero.fancollector.service.UsuarioItemService;
 import org.junit.jupiter.api.Test;
@@ -55,7 +56,7 @@ public class UsuarioItemControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
-    public void testListarUsuarioItems() throws Exception {
+    public void listarUsuarioItems_sinFiltros_devuelve200() throws Exception {
         UsuarioItemOutDTO ui1 = new UsuarioItemOutDTO();
         ui1.setId(1L);
         ui1.setIdUsuario(1L);
@@ -92,7 +93,7 @@ public class UsuarioItemControllerTest {
     }
 
     @Test
-    public void testBuscarUsuarioItemPorIdExistente() throws Exception {
+    public void buscarUsuarioItemPorId_existente_devuelve200() throws Exception {
         UsuarioItemOutDTO dto = new UsuarioItemOutDTO();
         dto.setId(1L);
         dto.setIdUsuario(1L);
@@ -115,7 +116,7 @@ public class UsuarioItemControllerTest {
     }
 
     @Test
-    public void testBuscarUsuarioItemPorIdNoExiste() throws Exception {
+    public void buscarUsuarioItemPorId_noExiste_devuelve404() throws Exception {
         when(usuarioItemService.buscarPorId(eq(999L), anyString(), anyBoolean(), anyBoolean()))
                 .thenThrow(new UsuarioItemNoEncontradoException(999L));
 
@@ -125,7 +126,7 @@ public class UsuarioItemControllerTest {
     }
 
     @Test
-    public void testCrearUsuarioItemDatosValidos() throws Exception {
+    public void crearUsuarioItem_datosValidos_devuelve201() throws Exception {
         UsuarioItemInDTO inDTO = new UsuarioItemInDTO();
         inDTO.setIdUsuario(1L);
         inDTO.setIdItem(1L);
@@ -157,7 +158,7 @@ public class UsuarioItemControllerTest {
     }
 
     @Test
-    public void testCrearUsuarioItemBodyInvalido() throws Exception {
+    public void crearUsuarioItem_bodyInvalido_devuelve400() throws Exception {
         mockMvc.perform(post("/usuario-items")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -167,7 +168,7 @@ public class UsuarioItemControllerTest {
     }
 
     @Test
-    public void testCrearUsuarioItemUsuarioNoExiste() throws Exception {
+    public void crearUsuarioItem_usuarioNoExiste_devuelve404() throws Exception {
         UsuarioItemInDTO inDTO = new UsuarioItemInDTO();
         inDTO.setIdUsuario(999L);
         inDTO.setIdItem(1L);
@@ -184,7 +185,7 @@ public class UsuarioItemControllerTest {
     }
 
     @Test
-    public void testCrearUsuarioItemItemNoExiste() throws Exception {
+    public void crearUsuarioItem_itemNoExiste_devuelve404() throws Exception {
         UsuarioItemInDTO inDTO = new UsuarioItemInDTO();
         inDTO.setIdUsuario(1L);
         inDTO.setIdItem(999L);
@@ -201,7 +202,7 @@ public class UsuarioItemControllerTest {
     }
 
     @Test
-    public void testCrearUsuarioItemColeccionNoExiste() throws Exception {
+    public void crearUsuarioItem_coleccionNoExiste_devuelve404() throws Exception {
         UsuarioItemInDTO inDTO = new UsuarioItemInDTO();
         inDTO.setIdUsuario(1L);
         inDTO.setIdItem(1L);
@@ -218,7 +219,19 @@ public class UsuarioItemControllerTest {
     }
 
     @Test
-    public void testModificarUsuarioItemExistente() throws Exception {
+    public void crearUsuarioItem_relacionDuplicada_devuelve400() throws Exception {
+        when(usuarioItemService.crear(any(UsuarioItemInDTO.class), anyString(), anyBoolean(), anyBoolean()))
+                .thenThrow(new RelacionYaExisteException("La relación ya existe"));
+
+        mockMvc.perform(post("/usuario-items")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UsuarioItemInDTO())))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void modificarUsuarioItem_existente_devuelve200() throws Exception {
         UsuarioItemPutDTO putDTO = new UsuarioItemPutDTO();
         putDTO.setEstado(EstadoItem.EN_CAMINO);
         putDTO.setCantidad(3);
@@ -244,7 +257,7 @@ public class UsuarioItemControllerTest {
     }
 
     @Test
-    public void testModificarUsuarioItemNoExiste() throws Exception {
+    public void modificarUsuarioItem_noExiste_devuelve404() throws Exception {
         UsuarioItemPutDTO putDTO = new UsuarioItemPutDTO();
         putDTO.setEstado(EstadoItem.TENGO);
 
@@ -259,7 +272,7 @@ public class UsuarioItemControllerTest {
     }
 
     @Test
-    public void testModificarUsuarioItemJsonNoParseable() throws Exception {
+    public void modificarUsuarioItem_jsonInvalido_devuelve500() throws Exception {
         mockMvc.perform(put("/usuario-items/1")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -269,7 +282,7 @@ public class UsuarioItemControllerTest {
     }
 
     @Test
-    public void testActualizarVisibilidadUsuarioItem() throws Exception {
+    public void actualizarVisibilidad_itemExistente_devuelve200() throws Exception {
         UsuarioItemVisibleDTO visibleDTO = new UsuarioItemVisibleDTO();
         visibleDTO.setEsVisible(false);
 
@@ -289,7 +302,7 @@ public class UsuarioItemControllerTest {
     }
 
     @Test
-    public void testActualizarVisibilidadUsuarioItemNoExiste() throws Exception {
+    public void actualizarVisibilidad_itemNoExiste_devuelve404() throws Exception {
         UsuarioItemVisibleDTO visibleDTO = new UsuarioItemVisibleDTO();
         visibleDTO.setEsVisible(false);
 
@@ -304,7 +317,7 @@ public class UsuarioItemControllerTest {
     }
 
     @Test
-    public void testActualizarVisibilidadBodyInvalido() throws Exception {
+    public void actualizarVisibilidad_bodyInvalido_devuelve400() throws Exception {
         mockMvc.perform(patch("/usuario-items/1/visible")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -313,19 +326,132 @@ public class UsuarioItemControllerTest {
     }
 
     @Test
-    public void testEliminarUsuarioItemExistente() throws Exception {
+    public void eliminarUsuarioItem_existente_devuelve204() throws Exception {
         mockMvc.perform(delete("/usuario-items/1")
                         .with(csrf()))
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    public void testEliminarUsuarioItemNoExiste() throws Exception {
+    public void eliminarUsuarioItem_noExiste_devuelve404() throws Exception {
         doThrow(new UsuarioItemNoEncontradoException(1L))
                 .when(usuarioItemService).eliminar(eq(1L), anyString(), anyBoolean(), anyBoolean());
 
         mockMvc.perform(delete("/usuario-items/1")
                         .with(csrf()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void buscarPorUsuarioYColeccionV2_existente_devuelve200() throws Exception {
+        com.svalero.fancollector.dto.UsuarioItemDetalleDTO dto =
+                new com.svalero.fancollector.dto.UsuarioItemDetalleDTO();
+        dto.setId(1L);
+        dto.setIdUsuario(1L);
+        dto.setNombreUsuario("Nerea");
+        dto.setIdItem(1L);
+        dto.setNombreItem("Darkrai");
+        dto.setEstado(EstadoItem.TENGO);
+        dto.setCantidad(2);
+        dto.setEsVisible(true);
+        dto.setDescripcionItem("Figura legendaria");
+        dto.setTipo("Figura");
+
+        when(usuarioItemService.buscarPorUsuarioYColeccion(eq(1L), eq(1L), anyString(), anyBoolean(), anyBoolean()))
+                .thenReturn(List.of(dto));
+
+        mockMvc.perform(get("/usuario-items/v2")
+                        .param("idUsuario", "1")
+                        .param("idColeccion", "1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[0].estado").value("TENGO"))
+                .andExpect(jsonPath("$[0].descripcionItem").value("Figura legendaria"))
+                .andExpect(jsonPath("$[0].tipo").value("Figura"));
+    }
+
+    @Test
+    public void buscarPorUsuarioYColeccionV2_sinResultados_devuelve200ListaVacia() throws Exception {
+        when(usuarioItemService.buscarPorUsuarioYColeccion(eq(1L), eq(99L), anyString(), anyBoolean(), anyBoolean()))
+                .thenReturn(List.of());
+
+        mockMvc.perform(get("/usuario-items/v2")
+                        .param("idUsuario", "1")
+                        .param("idColeccion", "99")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    public void buscarPorUsuarioYColeccionV2_sinParametros_devuelve500() throws Exception {
+        mockMvc.perform(get("/usuario-items/v2")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    public void actualizarCompletoV2_estadoBusco_devuelve200ConCantidadCero() throws Exception {
+        UsuarioItemPutDTO putDTO = new UsuarioItemPutDTO();
+        putDTO.setEstado(EstadoItem.BUSCO);
+        putDTO.setEsVisible(true);
+        putDTO.setNotas("Lo sigo buscando");
+
+        UsuarioItemOutDTO outDTO = new UsuarioItemOutDTO();
+        outDTO.setId(1L);
+        outDTO.setEstado(EstadoItem.BUSCO);
+        outDTO.setCantidad(0);
+        outDTO.setEsVisible(true);
+
+        when(usuarioItemService.actualizarCompletoV2(eq(1L), any(UsuarioItemPutDTO.class), anyString(), anyBoolean(), anyBoolean()))
+                .thenReturn(outDTO);
+
+        mockMvc.perform(put("/usuario-items/v2/1")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(putDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estado").value("BUSCO"))
+                .andExpect(jsonPath("$.cantidad").value(0));
+    }
+
+    @Test
+    public void actualizarCompletoV2_estadoTengo_devuelve200ConCantidadUno() throws Exception {
+        UsuarioItemPutDTO putDTO = new UsuarioItemPutDTO();
+        putDTO.setEstado(EstadoItem.TENGO);
+        putDTO.setEsVisible(true);
+
+        UsuarioItemOutDTO outDTO = new UsuarioItemOutDTO();
+        outDTO.setId(1L);
+        outDTO.setEstado(EstadoItem.TENGO);
+        outDTO.setCantidad(1);
+        outDTO.setEsVisible(true);
+
+        when(usuarioItemService.actualizarCompletoV2(eq(1L), any(UsuarioItemPutDTO.class), anyString(), anyBoolean(), anyBoolean()))
+                .thenReturn(outDTO);
+
+        mockMvc.perform(put("/usuario-items/v2/1")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(putDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estado").value("TENGO"))
+                .andExpect(jsonPath("$.cantidad").value(1));
+    }
+
+    @Test
+    public void actualizarCompletoV2_noExiste_devuelve404() throws Exception {
+        UsuarioItemPutDTO putDTO = new UsuarioItemPutDTO();
+        putDTO.setEstado(EstadoItem.TENGO);
+
+        when(usuarioItemService.actualizarCompletoV2(eq(999L), any(UsuarioItemPutDTO.class), anyString(), anyBoolean(), anyBoolean()))
+                .thenThrow(new UsuarioItemNoEncontradoException(999L));
+
+        mockMvc.perform(put("/usuario-items/v2/999")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(putDTO)))
                 .andExpect(status().isNotFound());
     }
 }

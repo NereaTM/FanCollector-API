@@ -11,10 +11,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(
-        name = "usuario_coleccion",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"usuario_id", "coleccion_id"})
-)
+@Table(name = "usuario_coleccion",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"usuario_id", "coleccion_id"}))
+
 public class UsuarioColeccion {
 
     @Id
@@ -32,12 +31,12 @@ public class UsuarioColeccion {
     @Column(name = "fecha_agregada")
     private LocalDateTime fechaAgregada = LocalDateTime.now();
 
-    @Column(name = "es_favorita") //PATCH
+    @Column(name = "es_favorita")
     private boolean esFavorita = false;
 
     @Column(name = "es_creador")
     private boolean esCreador = false;
 
-    @Column(name = "es_visible") //PATCH
+    @Column(name = "es_visible")
     private boolean esVisible = true;
 }

@@ -9,7 +9,9 @@ info:
 
 servers:
   - url: http://localhost:8080
-    description: Servidor de desarrollo local
+    description: Entorno de desarrollo local (BD en Docker, API en IDE con perfil dev)
+  - url: http://localhost:8080
+    description: Entorno de producción (BD + API en Docker con perfil prod)
 
 tags:
   - name: Usuarios
@@ -33,6 +35,7 @@ components:
       type: string
       enum:
         - USER
+        - MODS
         - ADMIN
       example: USER
 
@@ -116,6 +119,10 @@ components:
         usableComoPlantilla:
           type: boolean
           example: false
+        archivo:
+          type: string
+          format: binary
+          description: Imagen (jpg, png, gif, máx 15MB)
 
     ItemInDTO:
       type: object
@@ -147,6 +154,10 @@ components:
         anioLanzamiento:
           type: integer
           example: 2020
+        archivo:
+          type: string
+          format: binary
+          description: Imagen (jpg, png, gif, máx 15MB)
 
     UsuarioColeccionInDTO:
       type: object
@@ -208,6 +219,34 @@ components:
           example: 2
 
     # DTOs PUT
+    UsuarioPutDTO:
+      type: object
+      required:
+        - nombre
+        - email
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          example: Nerea Updated
+        email:
+          type: string
+          format: email
+          example: nerea.updated@gmail.com
+        urlAvatar:
+          type: string
+          example: ejemplo/avatar-nuevo.jpg
+        descripcion:
+          type: string
+          example: Fan de BTS, anime y Pokemon
+        contactoPublico:
+          type: string
+          example: "@nereanew"
+        archivo:
+          type: string
+          format: binary
+          description: Imagen (jpg, png, gif, máx 15MB)
+
     ColeccionPutDTO:
       type: object
       required:
@@ -234,6 +273,10 @@ components:
         usableComoPlantilla:
           type: boolean
           example: true
+        archivo:
+          type: string
+          format: binary
+          description: Imagen (jpg, png, gif, máx 15MB)
 
     ItemPutDTO:
       type: object
@@ -260,6 +303,10 @@ components:
         anioLanzamiento:
           type: integer
           example: 2021
+        archivo:
+          type: string
+          format: binary
+          description: Imagen (jpg, png, gif, máx 15MB)
 
     UsuarioColeccionPutDTO:
       type: object
@@ -384,6 +431,76 @@ components:
           type: string
           format: date-time
           example: "2025-12-01T10:30:00"
+
+    UsuarioRolDTO:
+      type: object
+      required:
+        - rol
+      properties:
+        rol:
+          $ref: '#/components/schemas/RolUsuario'
+
+    UsuarioAdminOutDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        nombre:
+          type: string
+          example: Nerea Test
+        email:
+          type: string
+          format: email
+          example: nerea.test@gmail.com
+        rol:
+          $ref: '#/components/schemas/RolUsuario'
+        urlAvatar:
+          type: string
+          example: ejemplo/avatar.jpg
+        descripcion:
+          type: string
+          example: Fan de BTS y anime
+        contactoPublico:
+          type: string
+          example: "@nereatest"
+        fechaRegistro:
+          type: string
+          format: date-time
+          example: "2025-12-01T10:30:00"
+        contrasena:
+          type: string
+          example: "$2a$10$hashedpassword..."
+
+    LoginDTO:
+      type: object
+      required:
+        - email
+        - contrasena
+      properties:
+        email:
+          type: string
+          format: email
+          example: nerea@gmail.com
+        contrasena:
+          type: string
+          example: password123
+
+    LoginResponseDTO:
+      type: object
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiJ9...
+        email:
+          type: string
+          example: nerea@gmail.com
+        nombre:
+          type: string
+          example: Nerea
+        rol:
+          $ref: '#/components/schemas/RolUsuario'
 
     ColeccionOutDTO:
       type: object
@@ -527,6 +644,85 @@ components:
           format: date-time
           example: "2025-12-06T09:15:00"
 
+    UsuarioColeccionDetalleDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 3
+        idUsuario:
+          type: integer
+          format: int64
+          example: 1
+        idColeccion:
+          type: integer
+          format: int64
+          example: 2
+        esFavorita:
+          type: boolean
+          example: true
+        esCreador:
+          type: boolean
+          example: false
+        esVisible:
+          type: boolean
+          example: true
+        fechaAgregada:
+          type: string
+          format: date-time
+          example: "2025-12-05T14:20:00"
+        coleccion:
+          $ref: '#/components/schemas/ColeccionOutDTO'
+        nombreUsuario:
+          type: string
+          example: Nerea Test
+
+    UsuarioItemDetalleDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        idUsuario:
+          type: integer
+          format: int64
+        nombreUsuario:
+          type: string
+        idColeccion:
+          type: integer
+          format: int64
+        nombreColeccion:
+          type: string
+        idItem:
+          type: integer
+          format: int64
+        nombreItem:
+          type: string
+        estado:
+          type: string
+          enum: [ BUSCO, TENGO, DROPEO, EN_CAMINO ]
+        cantidad:
+          type: integer
+        notas:
+          type: string
+        esVisible:
+          type: boolean
+        fechaRegistro:
+          type: string
+          format: date-time
+        descripcionItem:
+          type: string
+        imagenUrl:
+          type: string
+        tipo:
+          type: string
+        rareza:
+          type: string
+          enum: [ COMUN, RARO, EPICO, LEGENDARIO ]
+        anioLanzamiento:
+          type: integer
+
     # ERROR
     ErrorRespuesta:
       type: object
@@ -626,6 +822,16 @@ paths:
                     statusCode: 400
                     message: El email nerea.test@gmail.com ya esta registrado
                     errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -790,9 +996,9 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/UsuarioInDTO'
+              $ref: '#/components/schemas/UsuarioPutDTO'
             examples:
               actualizacionBasica:
                 summary: Actualizacion basica
@@ -861,6 +1067,16 @@ paths:
                 statusCode: 404
                 message: Usuario con id 999 no encontrado
                 errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -889,6 +1105,167 @@ paths:
       responses:
         '204':
           description: Usuario eliminado exitosamente
+        '404':
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 404
+                message: Usuario con id 999 no encontrado
+                errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 500
+                message: Error interno del servidor
+                errors: { }
+
+  /usuarios/{id}/admin:
+    get:
+      tags:
+        - Usuarios
+      summary: Obtener usuario con datos de administrador
+      description: Recupera la información completa de un usuario, incluyendo datos sensibles. Solo accesible por administradores.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del usuario
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: Usuario encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioAdminOutDTO'
+              example:
+                id: 1
+                nombre: Nerea Test
+                email: nerea.test@gmail.com
+                rol: USER
+                urlAvatar: ejemplo/avatar.jpg
+                descripcion: Fan de BTS y anime
+                contactoPublico: "@nereatest"
+                fechaRegistro: "2025-12-01T10:30:00"
+                contrasena: "$2a$10$hashedpassword..."
+        '404':
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 404
+                message: Usuario con id 999 no encontrado
+                errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 500
+                message: Error interno del servidor
+                errors: { }
+
+  /usuarios/{id}/rol:
+    patch:
+      tags:
+        - Usuarios
+      summary: Actualizar rol de usuario
+      description: Cambia el rol de un usuario. Solo accesible por administradores.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del usuario
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsuarioRolDTO'
+            examples:
+              ascenderAMods:
+                summary: Ascender a moderador
+                value:
+                  rol: MODS
+              ascenderAAdmin:
+                summary: Ascender a administrador
+                value:
+                  rol: ADMIN
+      responses:
+        '200':
+          description: Rol actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioOutDTO'
+              example:
+                id: 1
+                nombre: Nerea Test
+                email: nerea.test@gmail.com
+                rol: MODS
+                urlAvatar: ejemplo/avatar.jpg
+                descripcion: Fan de BTS y anime
+                contactoPublico: "@nereatest"
+                fechaRegistro: "2025-12-01T10:30:00"
+        '400':
+          description: Rol invalido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 400
+                message: Errores de validacion
+                errors:
+                  rol: El rol no puede ser nulo
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '404':
           description: Usuario no encontrado
           content:
@@ -980,6 +1357,16 @@ paths:
                 statusCode: 404
                 message: Usuario con id 999 no encontrado
                 errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -1000,7 +1387,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/ColeccionInDTO'
             examples:
@@ -1177,7 +1564,7 @@ paths:
                 message: Error interno del servidor
                 errors: { }
 
-  /coleccione/{id}:
+  /colecciones/{id}:
     get:
       tags:
         - Colecciones
@@ -1264,7 +1651,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/ColeccionPutDTO'
             examples:
@@ -1329,6 +1716,16 @@ paths:
                 statusCode: 404
                 message: Coleccion con id 999 no encontrada
                 errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -1367,6 +1764,16 @@ paths:
                 statusCode: 404
                 message: Coleccion con id 999 no encontrada
                 errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -1378,7 +1785,7 @@ paths:
                 message: Error interno del servidor
                 errors: { }
 
-  /coleccione/{id}/publico:
+  /colecciones/{id}/publico:
     patch:
       tags:
         - Colecciones
@@ -1463,6 +1870,16 @@ paths:
                 statusCode: 404
                 message: Coleccion con id 999 no encontrada
                 errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -1474,7 +1891,7 @@ paths:
                 message: Error interno del servidor
                 errors: { }
 
-  /coleccione/{id}/plantilla:
+  /colecciones/{id}/plantilla:
     patch:
       tags:
         - Colecciones
@@ -1559,6 +1976,16 @@ paths:
                 statusCode: 404
                 message: Coleccion con id 999 no encontrada
                 errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -1579,7 +2006,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/ItemInDTO'
             examples:
@@ -1833,7 +2260,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/ItemPutDTO'
             examples:
@@ -1897,6 +2324,16 @@ paths:
                 statusCode: 404
                 message: Item con id 999 no encontrado
                 errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -1934,6 +2371,16 @@ paths:
               example:
                 statusCode: 404
                 message: Item con id 999 no encontrado
+                errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
                 errors: { }
         '500':
           description: Error interno del servidor
@@ -2029,6 +2476,16 @@ paths:
                 statusCode: 404
                 message: Item con id 999 no encontrado
                 errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -2040,12 +2497,239 @@ paths:
                 message: Error interno del servidor
                 errors: { }
   # USUARIO-COLECCION
+
+  /usuario-colecciones/v2:
+    post:
+      tags:
+        - Usuario-Colecciones
+      summary: Crear relacion usuario-coleccion (v2)
+      description: Asocia un usuario con una coleccion y ademas copia automaticamente todos los items de la plantilla como UsuarioItems del usuario en estado BUSCO y 0.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsuarioColeccionInDTO'
+            examples:
+              relacionBasica:
+                summary: Relacion basica
+                value:
+                  idUsuario: 1
+                  idColeccion: 2
+                  esFavorita: true
+                  esCreador: false
+              relacionCreador:
+                summary: Usuario es creador
+                value:
+                  idUsuario: 2
+                  idColeccion: 3
+                  esFavorita: true
+                  esCreador: true
+      responses:
+        '201':
+          description: Relacion creada con items de plantilla copiados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioColeccionOutDTO'
+              examples:
+                relacionCreada:
+                  summary: Relacion recien creada
+                  value:
+                    id: 3
+                    idUsuario: 1
+                    idColeccion: 2
+                    esFavorita: true
+                    esCreador: false
+                    fechaAgregada: "2025-12-13T17:30:00"
+        '400':
+          description: Datos invalidos o relacion ya existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              examples:
+                validacionError:
+                  summary: Errores de validacion
+                  value:
+                    statusCode: 400
+                    message: Errores de validacion
+                    errors:
+                      idUsuario: El ID del usuario es obligatorio
+                      idColeccion: El ID de la coleccion es obligatorio
+                relacionDuplicada:
+                  summary: Relacion ya existe
+                  value:
+                    statusCode: 400
+                    message: La relacion ya existe
+                    errors: { }
+        '404':
+          description: Usuario o coleccion no encontrados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              examples:
+                usuarioNoEncontrado:
+                  summary: Usuario no existe
+                  value:
+                    statusCode: 404
+                    message: Usuario con id 999 no encontrado
+                    errors: { }
+                coleccionNoEncontrada:
+                  summary: Coleccion no existe
+                  value:
+                    statusCode: 404
+                    message: Coleccion con id 999 no encontrada
+                    errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta accion
+                errors: { }
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 500
+                message: Error interno del servidor
+                errors: { }
+
+    get:
+      tags:
+        - Usuario-Colecciones
+      summary: Listar relaciones usuario-coleccion con detalle (v2)
+      description: Obtiene la lista de relaciones entre usuarios y colecciones incluyendo los datos completos de la coleccion y el nombre del usuario. Acepta los mismos filtros que la version v1.
+      parameters:
+        - name: idUsuario
+          in: query
+          description: Filtrar por ID de usuario
+          required: false
+          schema:
+            type: integer
+            format: int64
+          example: 1
+        - name: idColeccion
+          in: query
+          description: Filtrar por ID de coleccion
+          required: false
+          schema:
+            type: integer
+            format: int64
+          example: 2
+        - name: soloFavoritas
+          in: query
+          description: Filtrar solo colecciones favoritas
+          required: false
+          schema:
+            type: boolean
+          example: true
+        - name: esVisible
+          in: query
+          description: Filtrar por visibilidad
+          required: false
+          schema:
+            type: boolean
+          example: true
+      responses:
+        '200':
+          description: Lista de relaciones con detalle obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UsuarioColeccionDetalleDTO'
+              examples:
+                listaConDetalle:
+                  summary: Lista con dos relaciones detalladas
+                  value:
+                    - id: 1
+                      idUsuario: 1
+                      idColeccion: 1
+                      esFavorita: true
+                      esCreador: true
+                      esVisible: true
+                      fechaAgregada: "2025-12-03T13:15:00"
+                      nombreUsuario: Nerea Test
+                      coleccion:
+                        id: 1
+                        idCreador: 1
+                        nombreCreador: Nerea Test
+                        nombre: BTS Love Yourself Collection
+                        descripcion: Coleccion completa de la era Love Yourself
+                        categoria: KPOP
+                        imagenPortada: ejemplo/portada-bts.jpg
+                        fechaCreacion: "2025-12-03T13:11:41"
+                        esPublica: true
+                        usableComoPlantilla: false
+                    - id: 2
+                      idUsuario: 1
+                      idColeccion: 2
+                      esFavorita: false
+                      esCreador: false
+                      esVisible: true
+                      fechaAgregada: "2025-12-05T14:20:00"
+                      nombreUsuario: Nerea Test
+                      coleccion:
+                        id: 2
+                        idCreador: 2
+                        nombreCreador: Juan Test
+                        nombre: Pokemon Gen1 Collection
+                        descripcion: Primera generacion completa
+                        categoria: ANIME
+                        imagenPortada: ejemplo/portada-pokemon.jpg
+                        fechaCreacion: "2025-12-04T10:00:00"
+                        esPublica: true
+                        usableComoPlantilla: true
+                soloFavoritasDetalle:
+                  summary: Solo colecciones favoritas con detalle
+                  value:
+                    - id: 1
+                      idUsuario: 1
+                      idColeccion: 1
+                      esFavorita: true
+                      esCreador: true
+                      esVisible: true
+                      fechaAgregada: "2025-12-03T13:15:00"
+                      nombreUsuario: Nerea Test
+                      coleccion:
+                        id: 1
+                        idCreador: 1
+                        nombreCreador: Nerea Test
+                        nombre: BTS Love Yourself Collection
+                        descripcion: Coleccion completa de la era Love Yourself
+                        categoria: KPOP
+                        imagenPortada: ejemplo/portada-bts.jpg
+                        fechaCreacion: "2025-12-03T13:11:41"
+                        esPublica: true
+                        usableComoPlantilla: false
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 500
+                message: Error interno del servidor
+                errors: { }
+
   /usuario-colecciones:
     post:
       tags:
         - Usuario-Colecciones
       summary: Crear relacion usuario-coleccion
-      description: Asocia un usuario con una coleccion
+      deprecated: true
+      description: Asocia un usuario con una coleccion. Deprecado, usar POST /usuario-colecciones/v2.
       requestBody:
         required: true
         content:
@@ -2133,6 +2817,16 @@ paths:
                     statusCode: 404
                     message: Coleccion con id 999 no encontrada
                     errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -2353,6 +3047,16 @@ paths:
                 statusCode: 404
                 message:Usuario-coleccion con ID: 999 no encontrado
                 errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -2367,8 +3071,9 @@ paths:
     delete:
       tags:
         - Usuario-Colecciones
-      summary: Eliminar relacion usuario-coleccion
-      description: Elimina una relacion entre usuario y coleccion
+      summary: Eliminar relacion usuario-coleccion (1)
+      deprecated: true
+      description: U sar DELETE /usuario-colecciones/v2/{id}. Elimina una relacion entre usuario y coleccion pero los items en relacion con la coleccion no se eliminan
       parameters:
         - name: id
           in: path
@@ -2390,6 +3095,64 @@ paths:
               example:
                 statusCode: 404
                 message:Usuario-coleccion con ID: 999 no encontrado
+                errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 500
+                message: Error interno del servidor
+                errors: { }
+  /usuario-colecciones/v2/{id}:
+    delete:
+      tags:
+        - Usuario-Colecciones
+      summary: Eliminar relacion usuario-coleccion e items
+      description: Elimina una relacion entre usuario y coleccion y tambien limpia los items de la relacion
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la relacion
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '204':
+          description: Relacion e items eliminada exitosamente
+        '404':
+          description: Relacion no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 404
+                message:Usuario-coleccion con ID: 999 no encontrado
+                errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
                 errors: { }
         '500':
           description: Error interno del servidor
@@ -2479,6 +3242,16 @@ paths:
               example:
                 statusCode: 404
                 message:Usuario-coleccion con ID: 999 no encontrado
+                errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
                 errors: { }
         '500':
           description: Error interno del servidor
@@ -2570,6 +3343,16 @@ paths:
                 statusCode: 404
                 message:
                   Usuario-coleccion con ID: 999 no encontrado
+                errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
                 errors: { }
         '500':
           description: Error interno del servidor
@@ -2695,6 +3478,16 @@ paths:
                     statusCode: 404
                     message: Coleccion con id 999 no encontrada
                     errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -2709,6 +3502,7 @@ paths:
     get:
       tags:
         - Usuario-Items
+      deprecated: true
       summary: Listar relaciones usuario-item con filtros opcionales
       description: Obtiene lista de items que los usuarios tienen, buscan o intercambian.
       parameters:
@@ -2965,6 +3759,16 @@ paths:
                 statusCode: 404
                 message: Usuario-Item con id 999 no encontrado
                 errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -3002,6 +3806,258 @@ paths:
               example:
                 statusCode: 404
                 message: Usuario-Item con id 999 no encontrado
+                errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 500
+                message: Error interno del servidor
+                errors: { }
+
+  /usuario-items/v2:
+    get:
+      tags:
+        - Usuario-Items
+      summary: Listar items del usuario en una coleccion con detalle completo (v2)
+      description: Devuelve los UsuarioItems de un usuario en una coleccion incluyendo los datos completos del item (rareza, tipo, descripcion, imagen). Combina de GET /items?idColeccion y GET /usuario-items en una sola llamada.
+      parameters:
+        - name: idUsuario
+          in: query
+          required: true
+          description: ID del usuario
+          schema:
+            type: integer
+            format: int64
+          example: 1
+        - name: idColeccion
+          in: query
+          required: true
+          description: ID de la coleccion
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: Lista de items del usuario con detalle completo
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UsuarioItemDetalleDTO'
+              examples:
+                itemsTengo:
+                  summary: Usuario con items en estado TENGO
+                  value:
+                    - id: 1
+                      idUsuario: 1
+                      nombreUsuario: Nerea Test
+                      idColeccion: 1
+                      nombreColeccion: BTS Love Yourself Collection
+                      idItem: 5
+                      nombreItem: RM - Map of the Soul 7 Photocard
+                      estado: TENGO
+                      cantidad: 2
+                      notas: En perfecto estado
+                      esVisible: true
+                      fechaRegistro: "2025-12-06T09:15:00"
+                      descripcionItem: Photocard oficial edicion especial
+                      imagenUrl: /uploads/rm-photocard.jpg
+                      tipo: Photocard
+                      rareza: RARO
+                      anioLanzamiento: 2020
+                itemsBusco:
+                  summary: Usuario con items en estado BUSCO
+                  value:
+                    - id: 2
+                      idUsuario: 1
+                      nombreUsuario: Nerea Test
+                      idColeccion: 2
+                      nombreColeccion: Pokemon Primera Generacion
+                      idItem: 10
+                      nombreItem: Blastoise Holo
+                      estado: BUSCO
+                      cantidad: 0
+                      notas: null
+                      esVisible: true
+                      fechaRegistro: "2025-12-10T11:00:00"
+                      descripcionItem: Carta holografica primera edicion
+                      imagenUrl: /uploads/blastoise.jpg
+                      tipo: Carta
+                      rareza: LEGENDARIO
+                      anioLanzamiento: 1999
+        '400':
+          description: Datos invalidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              examples:
+                parametroAusente:
+                  summary: Parametro obligatorio ausente
+                  value:
+                    statusCode: 400
+                    message: Errores de validacion
+                    errors:
+                      idUsuario: El ID del usuario es obligatorio
+                      idColeccion: El ID de la coleccion es obligatorio
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta accion
+                errors: { }
+        '404':
+          description: Usuario o coleccion no encontrados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              examples:
+                usuarioNoEncontrado:
+                  summary: Usuario no existe
+                  value:
+                    statusCode: 404
+                    message: Usuario con id 999 no encontrado
+                    errors: { }
+                coleccionNoEncontrada:
+                  summary: Coleccion no existe
+                  value:
+                    statusCode: 404
+                    message: Coleccion con id 999 no encontrada
+                    errors: { }
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 500
+                message: Error interno del servidor
+                errors: { }
+
+  /usuario-items/v2/{id}:
+    put:
+      tags:
+        - Usuario-Items
+      summary: Actualizar relacion usuario-item con auto-ajuste de cantidad
+      description: Acttualiza y si el estado es BUSCO la cantidad se fija a 0, en cualquier otro caso se fija a 1. El campo cantidad del cuerpo se ignora
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la relacion
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsuarioItemPutDTO'
+            examples:
+              cambiarABusco:
+                summary: Cambiar a BUSCO, cantidad se pone a 0 automaticamente
+                value:
+                  estado: BUSCO
+                  esVisible: true
+                  notas: Lo sigo buscando
+              cambiarATengo:
+                summary: Cambiar a TENGO, cantidad se pone a 1 automaticamente
+                value:
+                  estado: TENGO
+                  esVisible: true
+                  notas: Conseguido en el mercadillo
+      responses:
+        '200':
+          description: Relacion actualizada con cantidad ajustada automaticamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioItemOutDTO'
+              examples:
+                resultadoBusco:
+                  summary: Estado BUSCO, cantidad ajustada a 0
+                  value:
+                    id: 1
+                    idUsuario: 1
+                    nombreUsuario: Nerea Test
+                    idColeccion: 1
+                    nombreColeccion: BTS Love Yourself Collection
+                    idItem: 5
+                    nombreItem: RM - Map of the Soul 7 Photocard
+                    estado: BUSCO
+                    cantidad: 0
+                    notas: Lo sigo buscando
+                    esVisible: true
+                    fechaRegistro: "2025-12-06T09:15:00"
+                resultadoTengo:
+                  summary: Estado TENGO, cantidad ajustada a 1
+                  value:
+                    id: 1
+                    idUsuario: 1
+                    nombreUsuario: Nerea Test
+                    idColeccion: 1
+                    nombreColeccion: BTS Love Yourself Collection
+                    idItem: 5
+                    nombreItem: RM - Map of the Soul 7 Photocard
+                    estado: TENGO
+                    cantidad: 1
+                    notas: Conseguido en el mercadillo
+                    esVisible: true
+                    fechaRegistro: "2025-12-06T09:15:00"
+        '400':
+          description: Datos invalidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 400
+                message: Errores de validacion
+                errors:
+                  cantidad: La cantidad no puede ser negativa
+        '404':
+          description: Relacion no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 404
+                message: Usuario-Item con id 999 no encontrado
+                errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta accion
                 errors: { }
         '500':
           description: Error interno del servidor
@@ -3103,6 +4159,16 @@ paths:
                 statusCode: 404
                 message: Usuario-Item con id 999 no encontrado
                 errors: { }
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              example:
+                statusCode: 403
+                message: No tienes permisos para realizar esta acción
+                errors: { }
         '500':
           description: Error interno del servidor
           content:
@@ -3154,7 +4220,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UsuarioOutDTO'
+                $ref: '#/components/schemas/LoginResponseDTO'
               examples:
                 usuarioLogueado:
                   summary: Usuario autenticado correctamente

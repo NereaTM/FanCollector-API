@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -27,8 +29,7 @@ public class Coleccion {
     @Column(nullable = false, length = 100)
     private String nombre;
 
-    @Lob
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String descripcion;
 
     @NotBlank
@@ -41,9 +42,18 @@ public class Coleccion {
     @Column(name = "fecha_creacion")
     private LocalDateTime fechaCreacion = LocalDateTime.now();
 
-    @Column(name = "es_publica") //PATCH
+    @Column(name = "es_publica")
     private boolean esPublica = false;
 
-    @Column(name = "usable_como_plantilla") //PATCH
+    @Column(name = "usable_como_plantilla")
     private boolean usableComoPlantilla = false;
+
+    @OneToMany(mappedBy = "coleccion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Item> items = new ArrayList<>();
+
+    @OneToMany(mappedBy = "coleccion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UsuarioColeccion> usuarioColecciones = new ArrayList<>();
+
+    @OneToMany(mappedBy = "coleccion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UsuarioItem> usuarioItems = new ArrayList<>();
 }

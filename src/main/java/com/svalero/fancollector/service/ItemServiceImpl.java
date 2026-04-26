@@ -1,8 +1,7 @@
 package com.svalero.fancollector.service;
 
-import com.svalero.fancollector.domain.Coleccion;
-import com.svalero.fancollector.domain.Item;
-import com.svalero.fancollector.domain.Usuario;
+import com.svalero.fancollector.domain.*;
+import com.svalero.fancollector.domain.enums.EstadoItem;
 import com.svalero.fancollector.domain.enums.RarezaItem;
 import com.svalero.fancollector.dto.ItemInDTO;
 import com.svalero.fancollector.dto.ItemOutDTO;
@@ -12,13 +11,16 @@ import com.svalero.fancollector.exception.domain.ItemNoEncontradoException;
 import com.svalero.fancollector.exception.domain.UsuarioNoEncontradoException;
 import com.svalero.fancollector.repository.ColeccionRepository;
 import com.svalero.fancollector.repository.ItemRepository;
+import com.svalero.fancollector.repository.UsuarioColeccionRepository;
+import com.svalero.fancollector.repository.UsuarioItemRepository;
 import com.svalero.fancollector.security.auth.CurrentUserResolver;
 import com.svalero.fancollector.security.auth.Permisos;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -36,9 +38,15 @@ public class ItemServiceImpl implements ItemService {
     @Autowired
     private CurrentUserResolver currentUserResolver;
 
+    @Autowired
+    private UsuarioItemRepository usuarioItemRepository;
+
+    @Autowired
+    private UsuarioColeccionRepository usuarioColeccionRepository;
+
     @Override
-    public ItemOutDTO crearItem(ItemInDTO datosItem, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws ColeccionNoEncontradaException  {
+    @Transactional
+    public ItemOutDTO crearItem(ItemInDTO datosItem, String emailUsuario, boolean esAdmin, boolean esMods) {
 
         Coleccion coleccion = coleccionRepository.findById(datosItem.getIdColeccion())
                 .orElseThrow(() -> new ColeccionNoEncontradaException(datosItem.getIdColeccion()));
@@ -59,12 +67,36 @@ public class ItemServiceImpl implements ItemService {
         item.setColeccion(coleccion);
 
         Item guardado = itemRepository.save(item);
+
+        if (coleccion.isEsPublica() && coleccion.isUsableComoPlantilla()) {
+
+            List<UsuarioColeccion> unidos = usuarioColeccionRepository.findByColeccion_Id(coleccion.getId());
+
+            for (UsuarioColeccion uc : unidos) {
+                Usuario usuarioDueno = uc.getUsuario();
+
+                // Evitar duplicados por si acaso
+                boolean existe = usuarioItemRepository.existsByUsuarioIdAndColeccionIdAndItemId(
+                        usuarioDueno.getId(), coleccion.getId(), guardado.getId());
+                if (existe) continue;
+
+                UsuarioItem usuarioItem = new UsuarioItem();
+                usuarioItem.setUsuario(usuarioDueno);
+                usuarioItem.setColeccion(coleccion);
+                usuarioItem.setItem(guardado);
+                usuarioItem.setEstado(EstadoItem.BUSCO);
+                usuarioItem.setCantidad(0);
+                usuarioItem.setEsVisible(true);
+                usuarioItem.setFechaRegistro(LocalDateTime.now());
+
+                usuarioItemRepository.save(usuarioItem);
+            }
+        }
         return modelMapper.map(guardado, ItemOutDTO.class);
     }
 
     @Override
-    public ItemOutDTO buscarItemPorId(Long idItem, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws ItemNoEncontradoException {
+    public ItemOutDTO buscarItemPorId(Long idItem, String emailUsuario, boolean esAdmin, boolean esMods) {
         Item item = itemRepository.findById(idItem)
                 .orElseThrow(() -> new ItemNoEncontradoException(idItem));
         Usuario actual = currentUserResolver.usuarioActual(emailUsuario);
@@ -110,8 +142,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemOutDTO actualizarItem(Long idItem, ItemPutDTO datosItem, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws ItemNoEncontradoException, UsuarioNoEncontradoException {
+    public ItemOutDTO actualizarItem(Long idItem, ItemPutDTO datosItem, String emailUsuario, boolean esAdmin, boolean esMods) {
 
         Item existente = itemRepository.findById(idItem)
                 .orElseThrow(() -> new ItemNoEncontradoException(idItem));
@@ -139,8 +170,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemOutDTO actualizarRareza(Long id, RarezaItem rareza, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws ItemNoEncontradoException, UsuarioNoEncontradoException {
+    public ItemOutDTO actualizarRareza(Long id, RarezaItem rareza, String emailUsuario, boolean esAdmin, boolean esMods) {
 
         Item item = itemRepository.findById(id)
                 .orElseThrow(() -> new ItemNoEncontradoException(id));
@@ -155,8 +185,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public void eliminarItem(Long idItem, String emailUsuario, boolean esAdmin, boolean esMods)
-            throws ItemNoEncontradoException, UsuarioNoEncontradoException {
+    @Transactional
+    public void eliminarItem(Long idItem, String emailUsuario, boolean esAdmin, boolean esMods) {
 
         Item item = itemRepository.findById(idItem)
                 .orElseThrow(() -> new ItemNoEncontradoException(idItem));
