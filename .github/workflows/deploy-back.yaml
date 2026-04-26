@@ -64,4 +64,4 @@ jobs:
 
       - name: Desplegar backend en EKS
         run: |
-          kubectl apply -f k8s/backend-deployment.yaml
+          kubectl apply -f k8s/api-deployment.yaml
