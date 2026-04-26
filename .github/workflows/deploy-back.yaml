@@ -32,7 +32,7 @@ jobs:
         id: docker_meta
         uses: docker/metadata-action@v5
         with:
-          images: a28731nerea/fancollector-backend
+          images: a28731nerea/fancollector-api
           flavor: |
             latest=false
           # CAMBIAR LA VERSIÓN EN FUNCION DE LA NECESIDAD!
