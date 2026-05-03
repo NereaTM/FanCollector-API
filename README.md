@@ -127,6 +127,11 @@ O sin Makefile:
 
 La API estará disponible en `http://localhost:8080`
 
+## CI/CD
+El proyecto cuenta con dos workflows de GitHub Actions:
+- **Deploy a EKS**: se ejecuta en cada push/PR a `main`. Construye la imagen Docker, la sube a Docker Hub y despliega en un clúster de AWS EKS
+- **Tests de integración con Newman**: se ejecuta en PR a `main` y `develop`. Levanta la aplicación con Docker Compose y lanza las pruebas de la colección de Postman
+
 ## Autenticación
 La API utiliza JWT para autenticación
 1. **Te registras**
