@@ -1,0 +1,1865 @@
+{
+  "info": {
+    "_postman_id": "3b1a6e9a-016f-4927-94c9-694c1f9707c7",
+    "name": "V3.0.0 Producción",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "49388030",
+    "_collection_link": "https://go.postman.co/collection/49388030-3b1a6e9a-016f-4927-94c9-694c1f9707c7?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "COLECCION",
+      "item": [
+        {
+          "name": "OBTENER TODO",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/colecciones",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "colecciones"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "OBTENER POR ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/colecciones/2",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "colecciones",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "FILTROS",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/colecciones?nombreCreador=nerea&categoria=figuras&nombre=bts&idCreador={{usuarioId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "colecciones"
+              ],
+              "query": [
+                {
+                  "key": "nombreCreador",
+                  "value": "nerea"
+                },
+                {
+                  "key": "categoria",
+                  "value": "figuras"
+                },
+                {
+                  "key": "nombre",
+                  "value": "bts"
+                },
+                {
+                  "key": "idCreador",
+                  "value": "{{usuarioId}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CREAR COLECCION",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"idCreador\": 1,\r\n  \"nombre\": \"BTS USUARIO\",\r\n  \"descripcion\": \"Solo la era LY\",\r\n  \"categoria\": \"BTS\",\r\n  \"imagenPortada\": \"46545\",\r\n  \"esPublica\": false,\r\n  \"usableComoPlantilla\": false\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/colecciones",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "colecciones"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ACTUALIZAR POR ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "    {\r\n        \"nombre\": \"BTS LYPUT MOD\",\r\n        \"descripcion\": \"Solo la era LY NereaPUT\",\r\n        \"categoria\": \"KPOP\",\r\n        \"imagenPortada\": \"46545PUT\",\r\n        \"fechaCreacion\": \"2025-12-03T13:11:41.303461\",\r\n        \"esPublica\": true,\r\n        \"usableComoPlantilla\": false\r\n    }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/colecciones/{{coleccionId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "colecciones",
+                "{{coleccionId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ACTUALIZAR PLANTILLA",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "",
+                "value": "",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"usableComoPlantilla\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/colecciones/1/plantilla",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "colecciones",
+                "1",
+                "plantilla"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ACTUALIZAR PUBLICO",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"esPublica\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/colecciones/1/publico",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "colecciones",
+                "1",
+                "publico"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ELIMINAR COLECCION",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/colecciones/12",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "colecciones",
+                "12"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "ITEM",
+      "item": [
+        {
+          "name": "OBTENER TODO",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/items",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "BUSCAR POR ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/items/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "items",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "FILTROS",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/items?idColeccion={{coleccionId}}&texto=rm&rareza=RARO&tipo=Photocard",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "items"
+              ],
+              "query": [
+                {
+                  "key": "idColeccion",
+                  "value": "{{coleccionId}}"
+                },
+                {
+                  "key": "texto",
+                  "value": "rm"
+                },
+                {
+                  "key": "rareza",
+                  "value": "RARO"
+                },
+                {
+                  "key": "tipo",
+                  "value": "Photocard"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CREAR ITEM",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"idColeccion\": \"1\",\r\n    \"nombre\": \"V - Map of the Soul: 7\",\r\n    \"descripcion\": \"Photocard MOTS:7\",\r\n    \"imagenUrl\": \"v.jpg\",\r\n    \"tipo\": \"Photocard\",\r\n    \"rareza\": \"RARO\",\r\n    \"anioLanzamiento\": 2020\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/items",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ACTUALIZAR POR ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nombre\": \"RM - MOTS 7 MOD\",\r\n  \"descripcion\": \"Descripción actualizada\",\r\n  \"imagenUrl\": \"rm.jpg\",\r\n  \"tipo\": \"Photocard\",\r\n  \"rareza\": \"EPICO\",\r\n  \"anioLanzamiento\": 2021\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/items/2",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "items",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ACTUALIZAR RAREZA",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"rareza\": \"COMUN\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/items/3/rareza",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "items",
+                "3",
+                "rareza"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ELIMINAR POR ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/items/9",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "items",
+                "9"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "USUARIO/COLECCION",
+      "item": [
+        {
+          "name": "OBTENER TODO",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuario-colecciones",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuario-colecciones"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "OBTENER POR ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuario-colecciones/14",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuario-colecciones",
+                "14"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "FILTROS",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuario-colecciones?id=3&idUsuario=1&idColeccion=2&soloFavoritas=false",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuario-colecciones"
+              ],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "3"
+                },
+                {
+                  "key": "idUsuario",
+                  "value": "1"
+                },
+                {
+                  "key": "idColeccion",
+                  "value": "2"
+                },
+                {
+                  "key": "soloFavoritas",
+                  "value": "false",
+                  "description": "true/false"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CREAR USUARIO/COLECCION",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"idUsuario\": \"2\",\r\n    \"idColeccion\": \"1\",\r\n    \"esFavorita\": true,\r\n    \"esCreador\": false\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/usuario-colecciones",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuario-colecciones"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ACTUALIZAR",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"idUsuario\": \"2\",\r\n  \"idColeccion\": \"18\",\r\n  \"esFavorita\": true,\r\n  \"esCreador\": false,\r\n  \"esVisible\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/usuario-colecciones/15",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuario-colecciones",
+                "15"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CAMBIAR FAVORITO",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"esFavorita\": false\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/usuario-colecciones/15/favorita",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuario-colecciones",
+                "15",
+                "favorita"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ELIMINAR USUARIO/COLECCION",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/usuario-colecciones/14",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuario-colecciones",
+                "14"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "OBTENER TODO V2",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuario-colecciones/v2?idUsuario={{usuarioId}}&idColeccion=2&soloFavoritas=false&esVisible=true",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuario-colecciones",
+                "v2"
+              ],
+              "query": [
+                {
+                  "key": "idUsuario",
+                  "value": "{{usuarioId}}"
+                },
+                {
+                  "key": "idColeccion",
+                  "value": "2"
+                },
+                {
+                  "key": "soloFavoritas",
+                  "value": "false"
+                },
+                {
+                  "key": "esVisible",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CREAR USUARIO/COLECCION V2",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idUsuario\": 1,\n  \"idColeccion\": 2,\n  \"esFavorita\": false,\n  \"esCreador\": false,\n  \"esVisible\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/usuario-colecciones/v2",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuario-colecciones",
+                "v2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ELIMINAR V2",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuario-colecciones/v2/14",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuario-colecciones",
+                "v2",
+                "14"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ACTUALIZAR VISIBLE",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"esVisible\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/usuario-colecciones/{{usuarioColeccionId}}/visible",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuario-colecciones",
+                "{{usuarioColeccionId}}",
+                "visible"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "USUARIO/ITEM",
+      "item": [
+        {
+          "name": "OBTENER TODO",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuario-items",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuario-items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "OBTENER POR ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuario-items/4",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuario-items",
+                "4"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "FILTROS",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuario-items?idUsuario={{usuarioId}}&idItem=&idColeccion={{coleccionId}}&estado=TENGO&esVisible=true",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuario-items"
+              ],
+              "query": [
+                {
+                  "key": "idUsuario",
+                  "value": "{{usuarioId}}"
+                },
+                {
+                  "key": "idItem",
+                  "value": ""
+                },
+                {
+                  "key": "idColeccion",
+                  "value": "{{coleccionId}}"
+                },
+                {
+                  "key": "estado",
+                  "value": "TENGO"
+                },
+                {
+                  "key": "esVisible",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CREAR USUARIO/ITEM",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"idUsuario\": \"2\",\r\n  \"idColeccion\": \"1\",\r\n  \"idItem\": \"3\",\r\n  \"estado\": \"TENGO\",\r\n  \"cantidad\": 1,\r\n  \"notas\": \"En perfecto estado\",\r\n  \"esVisible\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/usuario-items",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuario-items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EDITAR USUARIO-ITEM",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"estado\": \"TENGO\",\r\n    \"esVisible\": false,\r\n    \"notas\": \"Intercambio pendiente\",\r\n    \"cantidad\": 2\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/usuario-items/2",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuario-items",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ACTUALIZAR VISIBLE",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"esVisible\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/usuario-items/{{usuarioItemId}}/visible",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuario-items",
+                "{{usuarioItemId}}",
+                "visible"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ELIMINAR USUARIO/ITEM",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuario-items/27",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuario-items",
+                "27"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "OBTENER TODO V2",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuario-items/v2?idUsuario={{usuarioId}}&idColeccion={{coleccionId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuario-items",
+                "v2"
+              ],
+              "query": [
+                {
+                  "key": "idUsuario",
+                  "value": "{{usuarioId}}"
+                },
+                {
+                  "key": "idColeccion",
+                  "value": "{{coleccionId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EDITAR V2",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"BUSCO\",\n  \"esVisible\": true,\n  \"notas\": \"Intercambio pendiente\",\n  \"cantidad\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/usuario-items/v2/2",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuario-items",
+                "v2",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "USUARIOS",
+      "item": [
+        {
+          "name": "OBTENER TODO",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "OBTENER POR ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuarios/4",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios",
+                "4"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "FILTROS",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuarios?rol=USER&nombre=juan&email=nerea@gmail.com",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios"
+              ],
+              "query": [
+                {
+                  "key": "rol",
+                  "value": "USER"
+                },
+                {
+                  "key": "nombre",
+                  "value": "juan",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "nerea@gmail.com",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CREAR USUARIO",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const now = new Date();\r",
+                  "const dateStr = now.toISOString().replace(/[:.]/g, '-');\r",
+                  "pm.environment.set(\"test_email\", `test-${dateStr}@gmail.com`);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Juan Antonio\",\n  \"email\": \"plsquefuncione@gmail.com\",\n  \"contrasena\": \"123456\",\n  \"urlAvatar\": \"user.jpg\",\n  \"descripcion\": \"USER\",\n  \"contactoPublico\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ACTUALIZAR POR ID",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const now = new Date();\r",
+                  "const dateStr = now.toISOString().replace(/[:.]/g, '-');\r",
+                  "pm.environment.set(\"test_email\", `test-${dateStr}@ejemplo.com`);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Nerea\",\n  \"email\": \"admin@gmail.com\",\n  \"urlAvatar\": \"admin.jpg\",\n  \"descripcion\": \"ADMIN\",\n  \"contactoPublico\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios/4",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios",
+                "4"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ACTUALIZAR CONTRASEÑA",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"contrasena\": \"123456\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios/2/contrasena",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios",
+                "2",
+                "contrasena"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ACTUALIZAR ROL",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"rol\": \"USER\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios/2/rol",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios",
+                "2",
+                "rol"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "OBTENER ADMIN POR ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuarios/{{usuarioId}}/admin",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{usuarioId}}",
+                "admin"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ELIMINAR USUARIO",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_active}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuarios/14",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios",
+                "14"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "LOGIN",
+      "item": [
+        {
+          "name": "REGISTRO_USER",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n    {\n    \"nombre\": \"Nerea\",\n    \"email\": \"admin@gmail.com\",\n    \"contrasena\": \"123456\",\n    \"urlAvatar\": \"admin.jpg\",\n    \"descripcion\": \"ADMIN\",\n    \"contactoPublico\": null\n  },\n    {\n    \"nombre\": \"Juan Antonio\",\n    \"email\": \"plsquefuncione@gmail.com\",\n    \"contrasena\": \"123456\",\n    \"urlAvatar\": \"user.jpg\",\n    \"descripcion\": \"USER\",\n    \"contactoPublico\": null\n  },\n  {\n    \"nombre\": \"juan\",\n    \"email\": \"modelador@gmail.com\",\n    \"contrasena\": \"123456\",\n    \"urlAvatar\": \"mod.jpg\",\n    \"descripcion\": \"MOD\",\n    \"contactoPublico\": null\n  }\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/registro",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "registro"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "TOKEN_USER",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var data = pm.response.json();",
+                  "pm.collectionVariables.set('token_active', data.token);",
+                  "pm.collectionVariables.set('usuarioId', data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"plsquefuncione@gmail.com\",\n  \"contrasena\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "TOKEN_ADMIN",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var data = pm.response.json();",
+                  "pm.collectionVariables.set('token_active', data.token);",
+                  "pm.collectionVariables.set('usuarioId', data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@gmail.com\",\n  \"contrasena\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "TOKEN_MOD",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var data = pm.response.json();",
+                  "pm.collectionVariables.set('token_active', data.token);",
+                  "pm.collectionVariables.set('usuarioId', data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"modelador@gmail.com\",\n  \"contrasena\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token_active}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": ""
+    },
+    {
+      "key": "token_active",
+      "value": ""
+    },
+    {
+      "key": "token_user",
+      "value": ""
+    },
+    {
+      "key": "token_adm",
+      "value": ""
+    },
+    {
+      "key": "token_mod",
+      "value": ""
+    },
+    {
+      "key": "usuarioId",
+      "value": ""
+    },
+    {
+      "key": "coleccionId",
+      "value": ""
+    },
+    {
+      "key": "usuarioColeccionId",
+      "value": ""
+    },
+    {
+      "key": "usuarioItemId",
+      "value": ""
+    }
+  ]
+}
