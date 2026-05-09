@@ -37,7 +37,7 @@ jobs:
             latest=false
           # CAMBIAR LA VERSIÓN EN FUNCION DE LA NECESIDAD!
           tags: |
-            type=raw,value=v3 
+            type=raw,value=v4
 
       - name: Construir y subir imagen Docker
         id: docker_build

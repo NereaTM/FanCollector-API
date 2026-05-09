@@ -20,7 +20,7 @@ spec:
       containers:
         - name: fancollector-api
           # CAMBIAR LA VERSIÓN EN FUNCION DE LA NECESIDAD!
-          image: a28731nerea/fancollector-api:v3
+          image: a28731nerea/fancollector-api:v4
           ports:
             - containerPort: 8080
           envFrom:
